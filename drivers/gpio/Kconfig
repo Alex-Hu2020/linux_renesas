@@ -961,6 +961,12 @@ config GPIO_MC9S08DZ60
 	help
 	  Select this to enable the MC9S08DZ60 GPIO driver
 
+config GPIO_AT9555
+       tristate "at9555 I/O ports"
+        depends on OF && I2C
+       help
+         Select this to enable the AT9555 GPIO driver
+
 config GPIO_PCA953X
 	tristate "PCA95[357]x, PCA9698, TCA64xx, and MAX7310 I/O ports"
 	select REGMAP_I2C
