@@ -22,6 +22,7 @@ subdir-y += nvidia
 subdir-y += qcom
 subdir-y += realtek
 subdir-y += renesas
+subdir-y += myir 
 subdir-y += rockchip
 subdir-y += socionext
 subdir-y += sprd
