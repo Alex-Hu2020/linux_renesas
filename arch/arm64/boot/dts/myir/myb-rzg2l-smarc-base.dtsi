@@ -2,11 +2,12 @@
 /*
  * Device Tree Source for the RZ/{G2L,V2L} SMARC SOM common parts
  *
- * Copyright (C) 2021 Renesas Electronics Corp.
+ * Copyright (C) 2022 MYiR Electronics Corp.
  */
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
+#include <dt-bindings/input/input.h>
 
 /* Select function support POEGD (1: enabled, 0 : disabled) */
 
@@ -84,6 +85,30 @@
 		regulator-always-on;
 	};
 
+	leds {
+		compatible = "gpio-leds";
+
+		led0 {
+			gpios = <&pinctrl RZG2L_GPIO(43, 1) GPIO_ACTIVE_LOW>;
+			label = "LED0";
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
+	};
+
+	keyboard {
+		compatible = "gpio-keys";
+		status = "okay";
+
+		key-1 {
+			gpios = <&pinctrl RZG2L_GPIO(1, 0) GPIO_ACTIVE_HIGH>;
+			linux,code = <KEY_1>;
+			label = "user_key";
+			wakeup-source;
+		};
+	};
+
+
 };
 
 &adc {
@@ -91,6 +116,8 @@
 	pinctrl-names = "default";
 	status = "okay";
 
+	/delete-node/ channel@4;
+	/delete-node/ channel@5;
 	/delete-node/ channel@6;
 	/delete-node/ channel@7;
 };
@@ -184,8 +211,10 @@
 };
 
 &pinctrl {
+
 	adc_pins: adc {
-		pinmux = <RZG2L_PORT_PINMUX(9, 0, 2)>; /* ADC_TRG */
+			groups = "adc_c";
+			function = "adc";
 	};
 
 	canfd1_pins: canfd1 {
