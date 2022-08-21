@@ -140,6 +140,25 @@
 		};
 	};
 
+    sound_rzg2l: sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&cpu_dai>;
+		simple-audio-card,frame-master = <&cpu_dai>;
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets = "Microphone", "Microphone Jack";
+		simple-audio-card,routing =
+				"L2", "Mic Bias",
+				"R2", "Mic Bias",
+				"Mic Bias", "Microphone Jack";
+		cpu_dai: simple-audio-card,cpu {
+				sound-dai = <&ssi0>;
+		};
+		codec_dai: simple-audio-card,codec {
+				sound-dai = <&sgtl5000>;
+				clocks = <&versa3 3>;
+		};
+    };
 
 };
 
@@ -254,9 +273,14 @@
 			input-enable;
 	};
 
+	// i2c3_pins: i2c3 {
+	// 		groups = "i2c3_b";
+	// 		function = "i2c3";
+	// };
+
 	i2c3_pins: i2c3 {
-			groups = "i2c3_b";
-			function = "i2c3";
+			pinmux = <RZG2L_PORT_PINMUX(18, 0, 3)>, /* SDA */
+					<RZG2L_PORT_PINMUX(18, 1, 3)>; /* SCL */
 	};
 
 	adc_pins: adc {
@@ -413,6 +437,22 @@
 			function = "sdhi1";
 		};
 	};
+
+	ssi0_pins: ssi0 {
+			groups = "ssi0_ctrl_d", "ssi0_data_d";
+			function = "ssi0";
+	};
+
+	usb0_pins: usb0 {
+			pinmux = <RZG2L_PORT_PINMUX(4, 0, 1)>, /* VBUS */
+						<RZG2L_PORT_PINMUX(5, 0, 1)>, /* OVC */
+						<RZG2L_PORT_PINMUX(5, 1, 1)>; /* OTG_ID */
+	};
+
+	usb1_pins: usb1 {
+			pinmux = <RZG2L_PORT_PINMUX(42, 0, 1)>, /* VBUS */
+						<RZG2L_PORT_PINMUX(42, 1, 1)>; /* OVC */
+	};
 };
 
 &sbc {
@@ -517,13 +557,13 @@
 	status = "disabled";
 };
 
-
 &usb2_phy1 {
         pinctrl-0 = <&usb1_pins>;
         pinctrl-names = "default";
 
         status = "okay";
 };
+
 &usb2_phy0 {
         pinctrl-0 = <&usb0_pins>;
         pinctrl-names = "default";
@@ -584,6 +624,26 @@
 	};
 };
 
+&i2c1 {
+	pinctrl-0 = <&i2c1_pins>;
+	pinctrl-names = "default";
+	clock-frequency = <100000>;
+	status = "okay";
+
+    rx8025t: rx8025t@32 {
+		compatible = "epson,rx8025t";
+		reg = <0x32>;
+    };
+
+	sgtl5000: audio-codec@a {
+		#sound-dai-cells = <0>;
+		compatible = "fsl,sgtl5000";
+		reg = <0xa>;
+		VDDIO-supply = <&reg_3p3v>;
+		VDDA-supply = <&reg_3p3v>;
+		VDDD-supply = <&reg_1p8v>;
+	};
+};
 
 &i2c3 {
 	pinctrl-0 = <&i2c3_pins>;
@@ -609,4 +669,11 @@
 			clock-divider-read-only = <1>, <1>, <1>, <1>, <1>;
 			clock-flags = <2176>, <2176>, <2176>, <2052>, <2176>, <2048>;
 	};
+};
+
+&ssi0 {
+	pinctrl-0 = <&ssi0_pins>;
+	pinctrl-0 = <&ssi0_pins &sound_clk_pins>;
+	pinctrl-names = "default";
+	status = "okay";
 };
