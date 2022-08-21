@@ -84,17 +84,6 @@
 		regulator-always-on;
 	};
 
-	vccq_sdhi0: regulator-vccq-sdhi0 {
-		compatible = "regulator-gpio";
-
-		regulator-name = "SDHI0 VccQ";
-		regulator-min-microvolt = <1800000>;
-		regulator-max-microvolt = <3300000>;
-		states = <3300000 1>, <1800000 0>;
-		regulator-boot-on;
-		gpios = <&pinctrl RZG2L_GPIO(39, 0) GPIO_ACTIVE_HIGH>;
-		regulator-always-on;
-	};
 };
 
 &adc {
@@ -414,13 +403,11 @@
 };
 
 /*sdcard*/
-&sdhi0 {
+&sdhi1 {
 	pinctrl-0 = <&sdhi1_pins>;
 	pinctrl-1 = <&sdhi1_pins_uhs>;
 	pinctrl-names = "default", "state_uhs";
-
 	vmmc-supply = <&reg_3p3v>;
-	vqmmc-supply = <&vccq_sdhi0>;
 	cd-gpios = <&pinctrl RZG2L_GPIO(42, 0) GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
 	sd-uhs-sdr50;
