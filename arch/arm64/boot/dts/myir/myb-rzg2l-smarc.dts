@@ -6,7 +6,6 @@
  */
 
 /dts-v1/;
-#include "r9a07g044l2.dtsi"
 #include "myb-rzg2l-smarc-base.dtsi"
 
 / {

@@ -4,6 +4,8 @@
  *
  * Copyright (C) 2022 MYiR Electronics Corp.
  */
+#include "r9a07g044l2.dtsi"
+#include "rzg2l-smarc-pinfunction.dtsi"
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
@@ -15,6 +17,16 @@
 	aliases {
 		ethernet0 = &eth0;
 		ethernet1 = &eth1;
+
+		serial0 = &scif0;
+		serial1 = &scif1;
+		serial2 = &scif2;
+		mmc0 = &sdhi0;
+		mmc1 = &sdhi1;
+
+		can0 = &canfd;
+		can1 = &canfd;
+
 	};
 
 	chosen {
@@ -83,6 +95,26 @@
 		regulator-max-microvolt = <1100000>;
 		regulator-boot-on;
 		regulator-always-on;
+	};
+
+	usb0_vbus_otg: regulator-usb0-vbus-otg {
+			compatible = "regulator-fixed";
+
+			regulator-name = "USB0_VBUS_OTG";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+	};
+
+	x1_clk: x1-clock {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <24000000>;
+	};
+
+	clk_ext_camera: clk_ext_camera {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <24000000>;
 	};
 
 	leds {
@@ -211,6 +243,21 @@
 };
 
 &pinctrl {
+
+	i2c0_pins: i2c0 {
+			pins = "RIIC0_SDA", "RIIC0_SCL";
+			input-enable;
+	};
+
+	i2c1_pins: i2c1 {
+			pins = "RIIC1_SDA", "RIIC1_SCL";
+			input-enable;
+	};
+
+	i2c3_pins: i2c3 {
+			groups = "i2c3_b";
+			function = "i2c3";
+	};
 
 	adc_pins: adc {
 			groups = "adc_c";
@@ -470,12 +517,36 @@
 	status = "disabled";
 };
 
+
+&usb2_phy1 {
+        pinctrl-0 = <&usb1_pins>;
+        pinctrl-names = "default";
+
+        status = "okay";
+};
+&usb2_phy0 {
+        pinctrl-0 = <&usb0_pins>;
+        pinctrl-names = "default";
+
+        vbus-supply = <&usb0_vbus_otg>;
+        status = "okay";
+};
+
 &ehci0 {
 	memory-region = <&global_cma>;
 };
 
 &ohci0 {
 	memory-region = <&global_cma>;
+
+	dr_mode = "otg";
+	status = "okay";
+
+	port {
+		usbotg_hs_ep: endpoint {
+				remote-endpoint = <&con_usbotg_hs_ep>;
+		};
+	};
 };
 
 &ehci1 {
@@ -484,4 +555,58 @@
 
 &ohci1 {
 	memory-region = <&global_cma>;
+	status = "okay";
+};
+
+&i2c0 {
+	pinctrl-0 = <&i2c0_pins>;
+	pinctrl-names = "default";
+
+	clock-frequency = <100000>;
+	status = "okay";
+
+	ptn5150: ptn5150@3d {
+		compatible = "nxp,ptn5150";
+		reg = <0x3d>;
+		pinctrl-names = "default";
+		connect-gpios = <&pinctrl RZG2L_GPIO(40, 2) GPIO_ACTIVE_HIGH>;
+		status = "okay";
+
+		connector {
+				compatible = "usb-c-connector";
+				label = "USB-C";
+				port {
+						con_usbotg_hs_ep: endpoint {
+										remote-endpoint = <&usbotg_hs_ep>;
+						};
+				};
+		};
+	};
+};
+
+
+&i2c3 {
+	pinctrl-0 = <&i2c3_pins>;
+	pinctrl-names = "default";
+	clock-frequency = <400000>;
+	status = "okay";
+
+	versa3: versa3@68 {
+			compatible = "renesas,5p35023";
+			reg = <0x68>;
+			#clock-cells = <1>;
+			clocks = <&x1_clk>;
+			clock-names = "x1";
+			assigned-clocks = <&versa3 0>,
+					<&versa3 1>,
+					<&versa3 2>,
+					<&versa3 3>,
+					<&versa3 4>,
+					<&versa3 5>;
+			assigned-clock-rates =  <12288000>, <25000000>,
+									<12000000>, <11289600>,
+									<11289600>, <24000000>;
+			clock-divider-read-only = <1>, <1>, <1>, <1>, <1>;
+			clock-flags = <2176>, <2176>, <2176>, <2052>, <2176>, <2048>;
+	};
 };
