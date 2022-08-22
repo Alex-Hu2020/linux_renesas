@@ -50,6 +50,12 @@
 	};
 };
 
+
+&pinctrl {
+
+
+};
+
 &ehci0 {
 	memory-region = <&global_cma>;
 };
@@ -65,3 +71,11 @@
 &ohci1 {
 	memory-region = <&global_cma>;
 };
+
+&du {
+        // pinctrl-0 = <&du_pins>;
+        // pinctrl-names = "default";
+        status = "disabled";
+};
+
+
