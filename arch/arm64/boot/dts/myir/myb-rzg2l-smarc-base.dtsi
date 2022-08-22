@@ -698,6 +698,13 @@
 			clock-divider-read-only = <1>, <1>, <1>, <1>, <1>;
 			clock-flags = <2176>, <2176>, <2176>, <2052>, <2176>, <2048>;
 	};
+
+	E2PROM:24C256C@50 {
+		compatible = "atmel,24c256";
+		reg = <0x50>;
+		pagesize = <64>;
+	};
+
 };
 
 &ssi0 {
