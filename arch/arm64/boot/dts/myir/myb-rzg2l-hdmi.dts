@@ -72,10 +72,67 @@
 	memory-region = <&global_cma>;
 };
 
+/* RGB */
 &du {
         // pinctrl-0 = <&du_pins>;
         // pinctrl-names = "default";
         status = "disabled";
 };
 
+/* MIPI DSI */
+&dsi0 {
+	status = "okay";
 
+	ports {
+		port@1 {
+			dsi0_out: endpoint {
+					remote-endpoint = <&lt8912_1_in>;
+					data-lanes = <1 2 3 4>;
+			};
+		};
+	};
+};
+
+&i2c3 {
+    clock-frequency = <100000>;
+    pinctrl-names = "default";
+    status = "okay";
+
+	/* MIPI-DSI to HDMI and LVDS adapter */
+	hdmi@48 {
+		compatible = "lontium,lt8912";
+		// pinctrl-0 = <&pinctrl_dsi_lvds_bridge>;
+		pinctrl-names = "default";
+
+		ddc-i2c-bus = <&i2c0>;
+
+		dsi-lanes = <4>;
+		reg = <0x48>;
+		reset-gpios = <&pinctrl RZG2L_GPIO(42, 2) GPIO_ACTIVE_HIGH>;
+		hpd-gpios = <&pinctrl RZG2L_GPIO(42, 3) GPIO_ACTIVE_HIGH>;
+
+		/*  lvds_mode :LVDS output or HDMI output
+		   0: lvds   1: hdmi  2: hdmi and lvds
+		*/
+		lvds_mode = <1>;     // 0: lvds   1: hdmi  2: hdmi and lvds
+		bit_color = <0> ;    // 0:24bit   1:18bit
+		hdmi_mode = <0>;     // 0: 1080P  1:720P
+
+		ports{
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				lt8912_1_in: endpoint {
+					remote-endpoint = <&dsi0_out>;
+				};
+			};
+
+
+		};
+
+	};
+
+};

@@ -1,0 +1,159 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Device Tree Source for the RZG2L Dual A55 Evaluation board
+ *
+ * Copyright (C) 2022 MYiR Electronics Corp.
+ */
+
+/dts-v1/;
+#include "myb-rzg2l-smarc-base.dtsi"
+
+/ {
+	model = "Evaluation board based on r9a07g044l2";
+	compatible = "renesas,r9a07g044l2-dev", "renesas,r9a07g044l2";
+
+	memory@48000000 {
+		device_type = "memory";
+		/* first 128MB is reserved for secure area. */
+		reg = <0x0 0x48000000 0x0 0x78000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		global_cma: linux,cma@58000000 {
+			compatible = "shared-dma-pool";
+			linux,cma-default;
+			reusable;
+			reg = <0x0 0x58000000 0x0 0x10000000>;
+		};
+		mmp_reserved: linux,multimedia {
+			compatible = "shared-dma-pool";
+			reusable;
+			reg = <0x00000000 0x68000000 0x0 0x8000000>;
+		};
+	};
+
+	mmngr {
+		compatible = "renesas,mmngr";
+		memory-region = <&mmp_reserved>;
+	};
+
+	mmngrbuf {
+		compatible = "renesas,mmngrbuf";
+	};
+
+	vspm_if {
+			compatible = "renesas,vspm_if";
+	};
+};
+
+
+&pinctrl {
+
+
+};
+
+&ehci0 {
+	memory-region = <&global_cma>;
+};
+
+&ohci0 {
+	memory-region = <&global_cma>;
+};
+
+&ehci1 {
+	memory-region = <&global_cma>;
+};
+
+&ohci1 {
+	memory-region = <&global_cma>;
+};
+
+/* RGB */
+&du {
+        // pinctrl-0 = <&du_pins>;
+        // pinctrl-names = "default";
+        status = "disabled";
+};
+
+/* MIPI DSI */
+&dsi0 {
+	status = "okay";
+
+	ports {
+		port@1 {
+			dsi0_out: endpoint {
+					remote-endpoint = <&lt8912_1_in>;
+					data-lanes = <1 2 3 4>;
+			};
+		};
+	};
+};
+
+&i2c3 {
+    clock-frequency = <100000>;
+    pinctrl-names = "default";
+    status = "okay";
+
+	/* MIPI-DSI to HDMI and LVDS adapter */
+	hdmi@48 {
+		compatible = "lontium,lt8912";
+		// pinctrl-0 = <&pinctrl_dsi_lvds_bridge>;
+		pinctrl-names = "default";
+
+		ddc-i2c-bus = <&i2c0>;
+
+		dsi-lanes = <4>;
+		reg = <0x48>;
+		reset-gpios = <&pinctrl RZG2L_GPIO(42, 2) GPIO_ACTIVE_HIGH>;
+		hpd-gpios = <&pinctrl RZG2L_GPIO(42, 3) GPIO_ACTIVE_HIGH>;
+
+		/*  lvds_mode :LVDS output or HDMI output
+		   0: lvds   1: hdmi  2: hdmi and lvds
+		*/
+		lvds_mode = <0>;     // 0: lvds   1: hdmi  2: hdmi and lvds
+		bit_color = <0> ;    // 0:24bit   1:18bit
+		hdmi_mode = <0>;     // 0: 1080P  1:720P
+
+		/* LVDS atk 10.1*/
+	    display-timings {
+	         native-mode = <&timing0>;
+			timing0:timing0{
+				clock-frequency = <71000000>;
+				hactive = <1280>;
+				hsync-len = <32>;
+				hback-porch = <80>;
+				hfront-porch = <48>;
+				vactive = <800>;
+				vsync-len = <6>;
+				vback-porch = <14>;
+				vfront-porch = <3>;
+				vsync-active = <0>;
+				hsync-active =<0>;
+				de-active =<0>;
+				pixelclk-active =<0>;
+			};
+
+	    };
+
+		ports{
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				lt8912_1_in: endpoint {
+					remote-endpoint = <&dsi0_out>;
+				};
+			};
+
+
+		};
+
+	};
+
+};
