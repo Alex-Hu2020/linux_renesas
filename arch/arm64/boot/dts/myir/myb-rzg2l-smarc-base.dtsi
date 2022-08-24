@@ -627,6 +627,21 @@
 	status = "okay";
 };
 
+
+&csi2 {
+	status = "okay";
+
+	ports {
+		port {
+			csi2_in: endpoint {
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+				remote-endpoint = <&ov5640_csi2_ep>;
+			};
+		};
+	};
+};
+
 &i2c0 {
 	pinctrl-0 = <&i2c0_pins>;
 	pinctrl-names = "default";
@@ -651,6 +666,31 @@
 				};
 		};
 	};
+
+	ov5640: ov5640@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		status = "okay";
+
+		clocks = <&clk_ext_camera>;
+		clock-names = "xclk";
+		clock-frequency = <24000000>;
+		virtual-channel = /bits/ 8 <0>;
+
+		gate-gpios =  <&pinctrl RZG2L_GPIO(39, 0) GPIO_ACTIVE_LOW>;
+		rst-gpios  =  <&pinctrl RZG2L_GPIO(39, 1) GPIO_ACTIVE_LOW>;
+		pwn-gpios  =  <&pinctrl RZG2L_GPIO(39, 2) GPIO_ACTIVE_LOW>;
+
+		port {
+			ov5640_csi2_ep: endpoint {
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+				remote-endpoint = <&csi2_in>;
+			};
+		};
+
+	};
+
 };
 
 &i2c1 {
