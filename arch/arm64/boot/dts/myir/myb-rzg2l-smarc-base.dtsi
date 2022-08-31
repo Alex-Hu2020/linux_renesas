@@ -29,9 +29,10 @@
 
 	};
 
-	chosen {
-		bootargs = "ignore_loglevel rw root=/dev/nfs ip=on";
-	};
+        chosen {
+                bootargs = "ignore_loglevel";
+                stdout-path = "serial0:115200n8";
+        };
 
 	memory@48000000 {
 		device_type = "memory";
