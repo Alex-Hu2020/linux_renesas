@@ -330,7 +330,8 @@ static int rx8025_probe(struct i2c_client *client,
 		struct rtc_time tm;
 		dev_info(&client->dev,
 			 "bad conditions detected, resetting date\n");
-		rtc_time_to_tm(0, &tm);	/* 1970/1/1 */
+		//rtc_time_to_tm(0, &tm);	/* 1970/1/1 */
+		rtc_time64_to_tm(0,&tm);
 		rx8025_set_time(&client->dev, &tm);
 	}
 
