@@ -196,8 +196,6 @@
 	status = "okay";
 
 	phy0: ethernet-phy@7 {
-		compatible = "ethernet-phy-id0022.1640",
-			     "ethernet-phy-ieee802.3-c22";
 		reg = <4>;
 		rxc-skew-psec = <2400>;
 		txc-skew-psec = <2400>;
@@ -225,8 +223,6 @@
 	status = "okay";
 
 	phy1: ethernet-phy@7 {
-		compatible = "ethernet-phy-id0022.1640",
-			     "ethernet-phy-ieee802.3-c22";
 		reg = <6>;
 		rxc-skew-psec = <2400>;
 		txc-skew-psec = <2400>;
