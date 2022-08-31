@@ -281,8 +281,7 @@
 	};
 
 	adc_pins: adc {
-			groups = "adc_c";
-			function = "adc";
+			pinmux = <RZG2L_PORT_PINMUX(48, 4, 3)>; /* ADC_TRG */
 	};
 
 	canfd1_pins: can1 {
