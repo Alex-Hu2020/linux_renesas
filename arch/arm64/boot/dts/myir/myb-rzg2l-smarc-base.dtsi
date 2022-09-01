@@ -118,6 +118,12 @@
 			clock-frequency = <24000000>;
 	};
 
+        clk_ext_audio: clk_ext_audio {
+                        compatible = "fixed-clock";
+                        #clock-cells = <0>;
+                        clock-frequency = <11289600>;
+        };
+
 	leds {
 		compatible = "gpio-leds";
 
@@ -714,6 +720,7 @@
 		VDDIO-supply = <&reg_3p3v>;
 		VDDA-supply = <&reg_3p3v>;
 		VDDD-supply = <&reg_1p8v>;
+		clocks = <&clk_ext_audio>;
 	};
 };
 
