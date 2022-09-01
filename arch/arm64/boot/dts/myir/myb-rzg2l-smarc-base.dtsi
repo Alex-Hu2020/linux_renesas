@@ -562,7 +562,7 @@
 	pinctrl-1 = <&sdhi1_pins_uhs>;
 	pinctrl-names = "default", "state_uhs";
 	vmmc-supply = <&reg_3p3v>;
-	cd-gpios = <&pinctrl RZG2L_GPIO(42, 0) GPIO_ACTIVE_LOW>;
+	cd-gpios = <&pinctrl RZG2L_GPIO(19, 0) GPIO_ACTIVE_LOW>;
 	bus-width = <4>;
 	sd-uhs-sdr50;
 	sd-uhs-sdr104;
@@ -662,7 +662,7 @@
 		compatible = "nxp,ptn5150";
 		reg = <0x3d>;
 		pinctrl-names = "default";
-		connect-gpios = <&pinctrl RZG2L_GPIO(40, 2) GPIO_ACTIVE_HIGH>;
+		connect-gpios = <&pinctrl RZG2L_GPIO(1, 1) GPIO_ACTIVE_HIGH>;
 		status = "okay";
 
 		connector {
@@ -782,7 +782,7 @@
 	status = "okay";
 
 	spidev@0 {
-			compatible = "spidev";
+			compatible = "spidev0";
 			reg = <0>;
 			spi-max-frequency = <8000000>;
 	};
