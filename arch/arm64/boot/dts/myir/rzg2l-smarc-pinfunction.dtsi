@@ -12,31 +12,22 @@
 	pinctrl-0 = <&sound_clk_pins>;
 	pinctrl-names = "default";
 
-	can0_pins: can0 {
-		pinmux = <RZG2L_PORT_PINMUX(10, 1, 2)>, /* TX */
-			 <RZG2L_PORT_PINMUX(11, 0, 2)>; /* RX */
-	};
+       can0_pins: can0 {
+//               pinmux = <RZG2L_PORT_PINMUX(10, 1, 2)>, /* TX */
+//                        <RZG2L_PORT_PINMUX(11, 0, 2)>; /* RX */
+       };
+ 
+       can1_pins: can1 {
+//               pinmux = <RZG2L_PORT_PINMUX(12, 1, 2)>, /* TX */
+//                        <RZG2L_PORT_PINMUX(13, 0, 2)>; /* RX */
+       };
 
-	/* SW7 should be at position 2->3 so that GPIO8_CAN0_STB line is activated */
-	can0-stb {
-		gpio-hog;
-		gpios = <RZG2L_GPIO(42, 2) GPIO_ACTIVE_HIGH>;
-		output-low;
-		line-name = "can0_stb";
-	};
-
-	can1_pins: can1 {
-		pinmux = <RZG2L_PORT_PINMUX(12, 1, 2)>, /* TX */
-			 <RZG2L_PORT_PINMUX(13, 0, 2)>; /* RX */
-	};
-
-	/* SW8 should be at position 2->3 so that GPIO9_CAN1_STB line is activated */
-	can1-stb {
-		gpio-hog;
-		gpios = <RZG2L_GPIO(42, 3) GPIO_ACTIVE_HIGH>;
-		output-low;
-		line-name = "can1_stb";
-	};
+        spi1_pins: spi1 {
+                pinmux = <RZG2L_PORT_PINMUX(47, 0, 5)>,
+                                <RZG2L_PORT_PINMUX(47, 1, 5)>,
+                                <RZG2L_PORT_PINMUX(47, 2, 5)>,
+                                <RZG2L_PORT_PINMUX(47, 3, 5)>;
+        };
 
 	i2c0_pins: i2c0 {
 		pins = "RIIC0_SDA", "RIIC0_SCL";
@@ -65,12 +56,12 @@
 			 <RZG2L_PORT_PINMUX(48, 4, 1)>; /* RTS# */
 	};
 
-	sd1-pwr-en-hog {
-		gpio-hog;
-		gpios = <RZG2L_GPIO(39, 2) GPIO_ACTIVE_HIGH>;
-		output-high;
-		line-name = "sd1_pwr_en";
-	};
+	//sd1-pwr-en-hog {
+	//	gpio-hog;
+	//	gpios = <RZG2L_GPIO(39, 2) GPIO_ACTIVE_HIGH>;
+	//	output-high;
+	//	line-name = "sd1_pwr_en";
+	//};
 
 	sdhi1_pins: sd1 {
 		sd1_data {
@@ -99,13 +90,6 @@
 	sound_clk_pins: sound_clk {
 		pins = "AUDIO_CLK1", "AUDIO_CLK2";
 		input-enable;
-	};
-
-	spi1_pins: spi1 {
-		pinmux = <RZG2L_PORT_PINMUX(44, 0, 1)>, /* CK */
-			 <RZG2L_PORT_PINMUX(44, 1, 1)>, /* MOSI */
-			 <RZG2L_PORT_PINMUX(44, 2, 1)>, /* MISO */
-			 <RZG2L_PORT_PINMUX(44, 3, 1)>; /* SSL */
 	};
 
 	ssi0_pins: ssi0 {
