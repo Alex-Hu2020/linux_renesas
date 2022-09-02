@@ -440,8 +440,7 @@
 
 	usb0_pins: usb0 {
 			pinmux = <RZG2L_PORT_PINMUX(4, 0, 1)>, /* VBUS */
-						<RZG2L_PORT_PINMUX(5, 0, 1)>, /* OVC */
-						<RZG2L_PORT_PINMUX(5, 1, 1)>; /* OTG_ID */
+						<RZG2L_PORT_PINMUX(5, 0, 1)>; /* OVC */
 	};
 
 	usb1_pins: usb1 {
@@ -778,5 +777,13 @@
 &scif3 {
         pinctrl-0 = <&scif2_pins>;
         pinctrl-names = "default";
+        status = "okay";
+};
+
+&hsusb {
+        dr_mode = "otg";
+        status = "okay";
+};
+&phyrst {
         status = "okay";
 };
