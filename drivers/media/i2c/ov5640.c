@@ -232,6 +232,8 @@ struct ov5640_dev {
 	struct regulator_bulk_data supplies[OV5640_NUM_SUPPLIES];
 	struct gpio_desc *reset_gpio;
 	struct gpio_desc *pwdn_gpio;
+	struct gpio_desc *gate_gpio;
+
 	bool   upside_down;
 
 	/* lock to protect all members below */
@@ -3050,6 +3052,8 @@ static int ov5640_probe(struct i2c_client *client)
 
 	sensor->ae_target = 52;
 
+	printk("alex 111 \n");
+
 	/* optional indication of physical rotation of sensor */
 	ret = fwnode_property_read_u32(dev_fwnode(&client->dev), "rotation",
 				       &rotation);
@@ -3065,6 +3069,8 @@ static int ov5640_probe(struct i2c_client *client)
 				 rotation);
 		}
 	}
+
+	printk("alex 222 \n");
 
 	endpoint = fwnode_graph_get_next_endpoint(dev_fwnode(&client->dev),
 						  NULL);
@@ -3101,6 +3107,14 @@ static int ov5640_probe(struct i2c_client *client)
 			sensor->xclk_freq);
 		return -EINVAL;
 	}
+	printk("alex 333 \n");
+
+	/* request optional gate pin */
+	sensor->gate_gpio = devm_gpiod_get_optional(dev, "gate",
+						    GPIOD_OUT_HIGH);
+	if (IS_ERR(sensor->gate_gpio))
+		return PTR_ERR(sensor->gate_gpio);
+
 
 	/* request optional power down pin */
 	sensor->pwdn_gpio = devm_gpiod_get_optional(dev, "powerdown",
@@ -3110,10 +3124,19 @@ static int ov5640_probe(struct i2c_client *client)
 
 	/* request optional reset pin */
 	sensor->reset_gpio = devm_gpiod_get_optional(dev, "reset",
-						     GPIOD_OUT_HIGH);
+						     GPIOD_OUT_LOW);
 	if (IS_ERR(sensor->reset_gpio))
 		return PTR_ERR(sensor->reset_gpio);
+	printk("alex 444 \n");
 
+
+	/* VDD POWER 
+	*/
+	gpiod_set_value_cansleep(sensor->pwdn_gpio, 0);
+	usleep_range(20000, 25000);
+	gpiod_set_value_cansleep(sensor->reset_gpio, 1);
+	usleep_range(20000, 25000);
+	
 	v4l2_i2c_subdev_init(&sensor->sd, client, &ov5640_subdev_ops);
 
 	sensor->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE |
@@ -3127,6 +3150,7 @@ static int ov5640_probe(struct i2c_client *client)
 	ret = ov5640_get_regulators(sensor);
 	if (ret)
 		return ret;
+	printk("alex 555 \n");
 
 	mutex_init(&sensor->lock);
 
