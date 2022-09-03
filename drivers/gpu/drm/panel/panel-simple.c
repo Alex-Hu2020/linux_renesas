@@ -517,6 +517,7 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 	panel->prepared = false;
 	panel->desc = desc;
 
+	printk("alex panel 1111 \n");
 	panel->no_hpd = of_property_read_bool(dev->of_node, "no-hpd");
 	if (!panel->no_hpd) {
 		err = panel_simple_get_hpd_gpio(dev, panel, true);
@@ -525,17 +526,19 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 	}
 
 	panel->supply = devm_regulator_get(dev, "power");
-	if (IS_ERR(panel->supply))
-		return PTR_ERR(panel->supply);
+//	if (IS_ERR(panel->supply))
+//		return PTR_ERR(panel->supply);
 
 	panel->enable_gpio = devm_gpiod_get_optional(dev, "enable",
-						     GPIOD_OUT_LOW);
+						     GPIOD_OUT_HIGH);
 	if (IS_ERR(panel->enable_gpio)) {
 		err = PTR_ERR(panel->enable_gpio);
 		if (err != -EPROBE_DEFER)
-			dev_err(dev, "failed to request GPIO: %d\n", err);
+			dev_err(dev, "alex failed to request GPIO: %d\n", err);
 		return err;
 	}
+
+	printk("alex panel 222 \n");
 
 	err = of_drm_get_panel_orientation(dev->of_node, &panel->orientation);
 	if (err) {
@@ -561,6 +564,8 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 		if (!of_get_display_timing(dev->of_node, "panel-timing", &dt))
 			panel_simple_parse_panel_timing_node(dev, panel, &dt);
 	}
+
+	printk("alex panel 333 \n");
 
 	connector_type = desc->connector_type;
 	/* Catch common mistakes for panels. */
@@ -619,14 +624,16 @@ static int panel_simple_probe(struct device *dev, const struct panel_desc *desc)
 	}
 
 	drm_panel_init(&panel->base, dev, &panel_simple_funcs, connector_type);
-
-	err = drm_panel_of_backlight(&panel->base);
-	if (err)
-		goto free_ddc;
+    printk("alex panel 444 \n");
+//	err = drm_panel_of_backlight(&panel->base);
+//	if (err)
+//		goto free_ddc;
 
 	drm_panel_add(&panel->base);
 
 	dev_set_drvdata(dev, panel);
+	
+	printk("alex panel 555 \n");
 
 	return 0;
 
@@ -3900,6 +3907,30 @@ static const struct panel_desc arm_rtsm = {
 	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
 };
 
+/* alex */
+static const struct drm_display_mode panel_800_480_mode = {
+	.clock = 30000,
+	.hdisplay = 800,
+	.hsync_start = 800 + 40,
+	.hsync_end = 800 + 40 + 48,
+	.htotal = 800 + 40 + 48 + 88,
+	.vdisplay = 480,
+	.vsync_start = 480 + 13,
+	.vsync_end = 480 + 13 + 3,
+	.vtotal = 480 + 13 + 3 + 32,
+	.flags = DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC,
+};
+
+static const struct panel_desc panel_800_480 = {
+	.modes = &panel_800_480_mode,
+	.num_modes = 1,
+	.bpc = 8, 
+	.bus_format = MEDIA_BUS_FMT_RGB888_1X24,
+	.bus_flags = DRM_BUS_FLAG_DE_HIGH | DRM_BUS_FLAG_PIXDATA_SAMPLE_NEGEDGE,
+	.connector_type = DRM_MODE_CONNECTOR_DPI,
+
+};
+
 static const struct of_device_id platform_of_match[] = {
 	{
 		.compatible = "ampire,am-1280800n3tzqw-t00h",
@@ -4300,6 +4331,9 @@ static const struct of_device_id platform_of_match[] = {
 	}, {
 		.compatible = "winstar,wf35ltiacd",
 		.data = &winstar_wf35ltiacd,
+	}, {
+		.compatible = "panel_800_480",
+		.data = &panel_800_480,
 	}, {
 		/* Must be the last entry */
 		.compatible = "panel-dpi",
