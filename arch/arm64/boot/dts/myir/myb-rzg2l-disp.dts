@@ -47,6 +47,41 @@
 			compatible = "renesas,vspm_if";
 	};
 
+	panel_powr1: regulator-panel_powr1 {
+		compatible = "regulator-gpio";
+		regulator-name = "panel-power1";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpios = <&pinctrl RZG2L_GPIO(28, 1) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	panel_powr2: regulator-panel_powr2 {
+		compatible = "regulator-gpio";
+		regulator-name = "panel-power2";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpios = <&pinctrl RZG2L_GPIO(37, 2) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+	panel@0 {
+		compatible = "myirtft_panel_7inch";
+		// backlight = <&lcd_backlight>;
+		power-supply = <&reg_3p3v>;
+		enable-gpios = <&pinctrl RZG2L_GPIO(42, 4) GPIO_ACTIVE_HIGH>;// backlight
+		status = "okay";
+		no-hpd;
+
+		port {
+			panel_lcd_in: endpoint {
+				remote-endpoint = <&du_out_rgb>;
+			};
+		};
+	};
 };
 
 
@@ -121,9 +156,17 @@
 	status = "disabled";
 };
 
+
 &du {
 	pinctrl-0 = <&du_pins>;
 	pinctrl-names = "default";
 	status = "okay";
-};
 
+	ports {
+		port@0 {
+			du_out_rgb: endpoint {
+				remote-endpoint = <&panel_lcd_in>;
+			};
+		};
+	};
+};
