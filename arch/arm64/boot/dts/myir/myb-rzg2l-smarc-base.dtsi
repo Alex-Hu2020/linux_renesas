@@ -120,6 +120,12 @@
 		clock-frequency = <11289600>;
 	};
 
+	clk_ext_camera: clk_ext_camera {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <12000000>;
+	};
+
 	leds {
 		compatible = "gpio-leds";
 
@@ -131,6 +137,17 @@
 		};
 	};
 
+	// keyboard {
+	// 	compatible = "gpio-keys";
+	// 	status = "okay";
+	// 	key-1 {
+	// 		interrupt-parent = <&pinctrl>;
+	// 		interrupts = <RZG2L_GPIO(1, 0) IRQ_TYPE_LEVEL_LOW>;
+	// 		linux,code = <KEY_1>;
+	// 		label = "user_key";
+	// 		wakeup-source;
+	// 	};
+	// };
 
     sound_rzg2l: sound {
 		compatible = "simple-audio-card";
@@ -562,6 +579,15 @@
 
 &csi2 {
 	status = "okay";
+	ports {
+		port {
+			csi2_in: endpoint {
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+				remote-endpoint = <&ov5640_csi2_ep>;
+			};
+		};
+	};
 };
 
 &i2c0 {
@@ -588,6 +614,31 @@
 				};
 		};
 	};
+
+	ov5640: camera@3c {
+		compatible = "ovti,ov5640";
+		reg = <0x3c>;
+		status = "okay";
+
+		clocks = <&clk_ext_camera>;
+		clock-names = "xclk";
+		clock-frequency = <12000000>;
+		virtual-channel = /bits/ 8 <0>;
+
+		gate-gpios =  <&pinctrl RZG2L_GPIO(39, 0) GPIO_ACTIVE_HIGH>;  // power
+		reset-gpios  =  <&pinctrl RZG2L_GPIO(39, 1) GPIO_ACTIVE_LOW>;
+		powerdown-gpios  =  <&pinctrl RZG2L_GPIO(39, 2) GPIO_ACTIVE_HIGH>;
+
+		port {
+			ov5640_csi2_ep: endpoint {
+				clock-lanes = <0>;
+				data-lanes = <1 2>;
+				remote-endpoint = <&csi2_in>;
+			};
+		};
+
+	};
+
 };
 
 &i2c1 {
