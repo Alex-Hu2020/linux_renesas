@@ -47,11 +47,13 @@ struct lt8912 {
 	u8 num_dsi_lanes;
 	u8 channel_id;
 	unsigned int irq;
+	enum drm_connector_status hpd_status;
 	u8 sink_is_hdmi;
 	struct regmap *regmap[3];
 	struct gpio_desc *hpd_gpio;
 	struct gpio_desc *reset_n;
 	struct i2c_adapter *ddc;        /* optional regular DDC I2C bus */
+	struct i2c_client *i2c_main;
 	u32 lvds_ctr;   // lvds enable
 	u32 bypass_scaler;
 	u32 bit_color;   // lvds bit  0:rgb888   1:rgb565 
@@ -623,14 +625,21 @@ lt8912_connector_detect(struct drm_connector *connector, bool force)
 	if (lt->lvds_mode==0) {
 		hpd = connector_status_connected;
 	} else {
-		hpd = connector_status_unknown;
-		do {
+		do
+		{
 			hpd_last = hpd;
-			hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
-				connector_status_connected : connector_status_disconnected;
+			hpd = lt->hpd_status;
 			msleep(20);
 			timeout += 20;
-		} while((hpd_last != hpd) && (timeout < 500));
+		}while((hpd_last != hpd) && (timeout < 500));
+		
+//		do {
+//			hpd_last = hpd;
+//			hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
+//				connector_status_connected : connector_status_disconnected;
+//			msleep(20);
+//			timeout += 20;
+//		} while((hpd_last != hpd) && (timeout < 500));
 
 		dev_info(lt->dev, "lt8912_connector_detect(): %u\n", hpd);
 	}
@@ -665,7 +674,10 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 {
 	struct lt8912 *lt = arg;
 	struct drm_connector *connector = &lt->connector;
+//	enum drm_connector_status hpd, hpd_last;
 
+	lt->hpd_status = connector_status_connected;
+	printk("alex hdmi iqr\n");
 	drm_helper_hpd_irq_event(connector->dev);
 
 	lt8912_init(lt);
@@ -826,7 +838,7 @@ static int lt8912_bridge_attach(struct drm_bridge *bridge,enum drm_bridge_attach
 	ret = lt8912_attach_dsi(lt);
 
 	if (!lt->lvds_mode) {
-		enable_irq(lt->irq);
+		enable_irq(lt->i2c_main->irq);
 	}
 	return ret;
 }
@@ -955,6 +967,7 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	if (!lt)
 		return -ENOMEM;
 
+	lt->i2c_main = i2c;
 	lt->dev = dev;
     lt->lvds_ctr = 0;	
 	lt->bypass_scaler = 0;
@@ -1012,6 +1025,20 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 		}
 	}
 
+	if (i2c->irq) {
+		//init_waitqueue_head(&adv7511->wq);
+
+		ret = devm_request_threaded_irq(dev, i2c->irq, NULL,
+						lt8912_hpd_irq_thread,
+						IRQF_ONESHOT, dev_name(dev),
+						lt);
+		if (ret) {
+			dev_err(dev, "failed to request irq\n");
+			return -ENODEV;
+		}
+	}
+
+#if 0
 	lt->hpd_gpio = devm_gpiod_get(dev, "hpd", GPIOD_IN);
 	if (IS_ERR(lt->hpd_gpio)) {
 		dev_err(dev, "failed to get hpd gpio\n");
@@ -1040,6 +1067,7 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	}
 
 	disable_irq(lt->irq);
+#endif
 
 	lt->reset_n = devm_gpiod_get_optional(dev, "reset", GPIOD_ASIS);
 	if (IS_ERR(lt->reset_n)) {
