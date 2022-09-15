@@ -170,3 +170,22 @@
 		};
 	};
 };
+
+&i2c1 {
+	pinctrl-0 = <&i2c1_pins>;
+	pinctrl-names = "default";
+	clock-frequency = <100000>;
+	status = "okay";
+
+    ft5x06: ft5x06@38 {
+        compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+            reg = <0x38>;
+            interrupt-parent = <&pinctrl>;
+            interrupts = <RZG2L_GPIO(41, 0) IRQ_TYPE_EDGE_FALLING>;
+            reset-gpios = <&pinctrl RZG2L_GPIO(41, 1) GPIO_ACTIVE_LOW>;
+            touchscreen-size-x=<800>;
+            touchscreen-size-y=<480>;
+    };
+
+
+};
