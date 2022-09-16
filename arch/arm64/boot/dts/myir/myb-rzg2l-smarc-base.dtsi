@@ -137,17 +137,16 @@
 		};
 	};
 
-	// keyboard {
-	// 	compatible = "gpio-keys";
-	// 	status = "okay";
-	// 	key-1 {
-	// 		interrupt-parent = <&pinctrl>;
-	// 		interrupts = <RZG2L_GPIO(1, 0) IRQ_TYPE_LEVEL_LOW>;
-	// 		linux,code = <KEY_1>;
-	// 		label = "user_key";
-	// 		wakeup-source;
-	// 	};
-	// };
+	keyboard {
+		compatible = "gpio-keys";
+		status = "okay";
+		key-1 {
+			interrupt-parent = <&pinctrl>;
+			interrupts = <RZG2L_GPIO(1, 0) IRQ_TYPE_LEVEL_LOW>;
+			linux,code = <KEY_1>;
+			label = "user_key";
+		};
+	};
 
     sound_rzg2l: sound {
 		compatible = "simple-audio-card";
@@ -405,8 +404,7 @@
 	};
 
 	usb0_pins: usb0 {
-			pinmux = <RZG2L_PORT_PINMUX(4, 0, 1)>, /* VBUS */
-						<RZG2L_PORT_PINMUX(5, 0, 1)>; /* OVC */
+			pinmux = <RZG2L_PORT_PINMUX(5, 0, 1)>; /* OVC */
 	};
 
 	usb1_pins: usb1 {
@@ -439,7 +437,7 @@
 &sbc {
 	pinctrl-0 = <&qspi0_pins>;
 	pinctrl-names = "default";
-	status = "disabled";
+	status = "okay";
 
 	flash@0 {
 		compatible = "micron,mt25qu512a", "jedec,spi-nor";
