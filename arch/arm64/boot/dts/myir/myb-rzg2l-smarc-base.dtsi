@@ -404,7 +404,10 @@
 	};
 
 	usb0_pins: usb0 {
-			pinmux = <RZG2L_PORT_PINMUX(5, 0, 1)>; /* OVC */
+			pinmux = <RZG2L_PORT_PINMUX(5, 0, 1)>,   /* OVC */
+                      <RZG2L_PORT_PINMUX(5, 1, 1)>; /* OTG_ID */
+
+
 	};
 
 	usb1_pins: usb1 {
