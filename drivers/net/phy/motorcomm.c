@@ -130,7 +130,7 @@ static int yt8010_config_aneg(struct phy_device *phydev)
 	return 0;
 }
 
-static int yt8521_delaysel_init(struct phy_device *phydev) {
+static int yt85x_delaysel_init(struct phy_device *phydev) {
   int ret;
   int val, tmp;
 
@@ -139,7 +139,7 @@ static int yt8521_delaysel_init(struct phy_device *phydev) {
     return val;
 
   // modify tx delay sel
-  tmp = (val & 0xF0) | 0x03;
+  tmp = (val & 0xF0) | 0x0b;
   ret = ytphy_write_ext(phydev, YT8521_EXTREG_RGMII_CONFIG1, tmp);
   return ret;
 }
@@ -248,7 +248,7 @@ static int yt8531_led_init(struct phy_device *phydev)
     int mask;
 
     val = ytphy_read_ext(phydev, YT8521_EXTREG_LED1);
-    printk("val=%x\n",val);
+//    printk("val=%x\n",val);
     if (val < 0)
         return val;
 
@@ -667,10 +667,11 @@ static int yt8521_config_init(struct phy_device *phydev)
 
 	if((phydev->phy_id&0xfff) == PHY_ID_YT8531S){
 		ret = yt8531_led_init(phydev);
+		ret = yt85x_delaysel_init(phydev);
 	}
 	else{
 		ret = yt8521_led_init(phydev);
-	    ret = yt8521_delaysel_init(phydev);
+	    ret = yt85x_delaysel_init(phydev);
 	}
     
 	/* disable auto sleep */
@@ -699,7 +700,7 @@ static int yt8521_config_init(struct phy_device *phydev)
 
 
 		
-	printk (KERN_INFO "yt8521_config_init, 8521 init call out.\n");
+//	printk (KERN_INFO "yt8521_config_init, 8521 init call out.\n");
 	return ret;
 }
 
