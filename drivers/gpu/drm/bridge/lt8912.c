@@ -29,6 +29,12 @@
 #include <drm/drm_panel.h>
 #include <drm/drm_probe_helper.h>
 
+#include <sound/core.h>
+#include <sound/hdmi-codec.h>
+#include <sound/pcm.h>
+#include <sound/soc.h>
+#include <linux/of_graph.h>
+
 
 enum {
 	LT8912_AUDIO_NONE,
@@ -61,6 +67,11 @@ struct lt8912 {
 	u32 hdmi_mode;
 	struct videomode lvds_vm;
 	u8 audio_mode;	 /* selected audio mode - valid only for HDMI output */
+
+	unsigned int f_tmds;
+	unsigned int f_audio;
+	unsigned int audio_source;
+	struct platform_device *audio_pdev;
 };
 
 //--------------------------------------------//
@@ -155,6 +166,146 @@ static const struct drm_display_mode default_mode[] = {
 		.vtotal = 720 + 5  + 5 + 20,
 	}
 };
+
+/* alex audio
+*/
+
+static void lt8912_calc_cts_n(unsigned int f_tmds, unsigned int fs,
+			       unsigned int *cts, unsigned int *n)
+{
+	switch (fs) {
+	case 32000:
+	case 48000:
+	case 96000:
+	case 192000:
+		*n = fs * 128 / 1000;
+		break;
+	case 44100:
+	case 88200:
+	case 176400:
+		*n = fs * 128 / 900;
+		break;
+	}
+
+	*cts = ((f_tmds * *n) / (128 * fs)) * 1000;
+}
+
+static int lt8912_update_cts_n(struct lt8912 *lt8912)
+{
+	unsigned int cts = 0;
+	unsigned int n = 0;
+	return 0;
+}
+
+enum {
+	_32KHz = 0,
+	_44d1KHz,
+	_48KHz,
+
+	_88d2KHz,
+	_96KHz,
+	_176Khz,
+	_196KHz
+};
+
+u16 IIS_N[] =
+{
+	4096,               // 32K
+	6272,               // 44.1K
+	6144,               // 48K
+	12544,              // 88.2K
+	12288,              // 96K
+	25088,              // 176K
+	24576               // 196K
+};
+
+u16 Sample_Freq[] =
+{
+	0x30,               // 32K
+	0x00,               // 44.1K
+	0x20,               // 48K
+	0x80,               // 88.2K
+	0xa0,               // 96K
+	0xc0,               // 176K
+	0xe0                // 196K
+};
+
+int lt8912_hdmi_hw_params(struct device *dev, void *data,
+			   struct hdmi_codec_daifmt *fmt,
+			   struct hdmi_codec_params *hparms)
+{
+	struct lt8912 *lt8912 = dev_get_drvdata(dev);
+	unsigned int audio_source, i2s_format = 0;
+	unsigned int invert_clock;
+	unsigned int rate;
+	unsigned int len;
+
+	return 0;
+}
+
+static int audio_startup(struct device *dev, void *data)
+{
+//	struct lt8912 *lt8912 = dev_get_drvdata(dev);
+
+	return 0;
+}
+
+static void audio_shutdown(struct device *dev, void *data)
+{
+//	struct lt8912 *lt8912 = dev_get_drvdata(dev);
+}
+
+static int lt8912_hdmi_i2s_get_dai_id(struct snd_soc_component *component,
+					struct device_node *endpoint)
+{
+	struct of_endpoint of_ep;
+	int ret;
+
+	ret = of_graph_parse_endpoint(endpoint, &of_ep);
+	if (ret < 0)
+		return ret;
+
+	/*
+	 * HDMI sound should be located as reg = <2>
+	 * Then, it is sound port 0
+	 */
+	if (of_ep.port == 2)
+		return 0;
+
+	return -EINVAL;
+}
+
+static const struct hdmi_codec_ops lt8912_codec_ops = {
+	.hw_params	= lt8912_hdmi_hw_params,
+	.audio_shutdown = audio_shutdown,
+	.audio_startup	= audio_startup,
+	.get_dai_id	= lt8912_hdmi_i2s_get_dai_id,
+};
+
+static const struct hdmi_codec_pdata codec_data = {
+	.ops = &lt8912_codec_ops,
+	.max_i2s_channels = 2,
+	.i2s = 1,
+	.spdif = 1,
+};
+
+int lt8912_audio_init(struct device *dev, struct lt8912 *lt8912)
+{
+	lt8912->audio_pdev = platform_device_register_data(dev,
+					HDMI_CODEC_DRV_NAME,
+					PLATFORM_DEVID_AUTO,
+					&codec_data,
+					sizeof(codec_data));
+	return PTR_ERR_OR_ZERO(lt8912->audio_pdev);
+}
+
+void lt8912_audio_exit(struct lt8912 *lt8912)
+{
+	if (lt8912->audio_pdev) {
+		platform_device_unregister(lt8912->audio_pdev);
+		lt8912->audio_pdev = NULL;
+	}
+}
 
 
 static int lt8912_attach_dsi(struct lt8912 *lt);
@@ -417,34 +568,38 @@ static void lt8912_avi_config(struct lt8912 *lt)
 
 static void lt8912_audio_config(struct lt8912 *lt)
 {
-	// regmap_write(lt->regmap[0], 0xb2, 0x01); // 0x01:HDMI; 0x00: DVI lt->sink_is_hdmi
-	regmap_write(lt->regmap[2], 0x06, 0x0e);
-	regmap_write(lt->regmap[2], 0x07, 0x00);
-	regmap_write(lt->regmap[2], 0x34, 0xd2);
+    regmap_write(lt->regmap[0], 0xb2, 0x01); // 0x01:HDMI; 0x00: DVI lt->sink_is_hdmi
+	switch(lt->audio_mode) {
+		case LT8912_AUDIO_NONE:
+			regmap_write(lt->regmap[2], 0x06, 0x00);
+			regmap_write(lt->regmap[2], 0x07, 0x00);
+			regmap_write(lt->regmap[2], 0x34, 0xd2);
+			regmap_write(lt->regmap[2], 0x3c, 0x41);
+			break;
+		case LT8912_AUDIO_SPDIF:
+			regmap_write(lt->regmap[2], 0x06,0x0e);
+			regmap_write(lt->regmap[2], 0x07,0x00);
+			regmap_write(lt->regmap[2], 0x34,0xD2);
+			break;
+		case LT8912_AUDIO_I2S:
+			regmap_write(lt->regmap[2], 0x06, 0x08);
+			regmap_write(lt->regmap[2], 0x07, 0xf0);
+			regmap_write(lt->regmap[2], 0x09, 0x00);
+			break;
+	}
+
+	regmap_write( lt->regmap[2], 0x0f, 0x0b + Sample_Freq[_48KHz]);
+	regmap_write( lt->regmap[2],0x37, (u8)( IIS_N[_48KHz] / 0x10000 ) );
+	regmap_write( lt->regmap[2],0x36, (u8)( ( IIS_N[_48KHz] & 0x00FFFF ) / 0x100 ) );
+	regmap_write( lt->regmap[2],0x35, (u8)( IIS_N[_48KHz] & 0x0000FF ) );
+
+	regmap_write(lt->regmap[2], 0x34, 0xD2);  // D2: 32BIT  E2:16BIT
 	regmap_write(lt->regmap[2], 0x3c, 0x41);
 
- 	regmap_write(lt->regmap[0], 0xb2, lt->sink_is_hdmi);	// 0x01:HDMI; 0x00: DVI
-
-	// switch(lt->audio_mode) {
-	// 	case LT8912_AUDIO_NONE:
-	// 		regmap_write(lt->regmap[2], 0x06, 0x00);
-	// 		regmap_write(lt->regmap[2], 0x07, 0x00);
-	// 		regmap_write(lt->regmap[2], 0x34, 0xd2);
-	// 		regmap_write(lt->regmap[2], 0x3c, 0x41);
-	// 		break;
-	// 	case LT8912_AUDIO_SPDIF:
-	// 		regmap_write(lt->regmap[2], 0x06,0x0e);
-	// 		regmap_write(lt->regmap[2], 0x07,0x00);
-	// 		regmap_write(lt->regmap[2], 0x34,0xD2);
-	// 		break;
-	// 	case LT8912_AUDIO_I2S:
-	// 		regmap_write(lt->regmap[2], 0x08, 0x00);
-	// 		regmap_write(lt->regmap[2], 0x07, 0xf0);
-	// 		regmap_write(lt->regmap[2], 0x0f, 0x28); //Audio 16bit, 48K
-	// 		regmap_write(lt->regmap[2], 0x34, 0xe2); //sclk = 64fs, 0xd2; sclk = 32fs, 0xe2.
-	// 		break;
-	// }
-
+//	regmap_write(lt->regmap[2], 0x08, 0x00);
+//	regmap_write(lt->regmap[2], 0x07, 0xf0);
+//	regmap_write(lt->regmap[2], 0x0f, 0x28); //Audio 16bit, 48K
+//	regmap_write(lt->regmap[2], 0x34, 0xe2); //sclk = 64fs, 0xd2; sclk = 32fs, 0xe2.
 }
 
 static void lt8912_init(struct lt8912 *lt)
@@ -678,9 +833,9 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 
 	lt->hpd_status = connector_status_connected;
 	printk("alex hdmi iqr\n");
-	drm_helper_hpd_irq_event(connector->dev);
+	//drm_helper_hpd_irq_event(connector->dev);
 
-	lt8912_init(lt);
+	//lt8912_init(lt);
 	
 	return IRQ_HANDLED;
 }
@@ -837,9 +992,9 @@ static int lt8912_bridge_attach(struct drm_bridge *bridge,enum drm_bridge_attach
 
 	ret = lt8912_attach_dsi(lt);
 
-	if (!lt->lvds_mode) {
-		enable_irq(lt->i2c_main->irq);
-	}
+	//if (!lt->lvds_mode) {
+	//	enable_irq(lt->i2c_main->irq);
+	//}
 	return ret;
 }
 
@@ -954,7 +1109,7 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	unsigned int irq_flags;
 
 	int ret,dsi_lanes=0,bit_color=0;
-	u32 lvds_mode=0;
+	u32 lvds_mode=0,audio_mode=0;
 	u32 hdmi_mode = 0;
 	static int initialize_it = 1;
 
@@ -977,12 +1132,14 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	of_property_read_u32(dev->of_node, "hdmi_mode", &hdmi_mode);
 	of_property_read_u32(dev->of_node, "bit_color", &bit_color);
 	of_property_read_u32(dev->of_node, "lvds_mode", &lvds_mode);
+	of_property_read_u32(dev->of_node, "audio_mode", &audio_mode);
 
 	lt->num_dsi_lanes = dsi_lanes;
 	lt->channel_id = 1;
 	lt->hdmi_mode = hdmi_mode;
 	lt->bit_color =  bit_color;
 	lt->lvds_mode =  lvds_mode;
+	lt->audio_mode = audio_mode;
 
 	switch (lvds_mode)
 	{
@@ -1026,7 +1183,7 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	}
 
 	if (i2c->irq) {
-		//init_waitqueue_head(&adv7511->wq);
+		//init_waitqueue_head(&lt8912->wq);
 
 		ret = devm_request_threaded_irq(dev, i2c->irq, NULL,
 						lt8912_hpd_irq_thread,
@@ -1038,6 +1195,7 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 		}
 	}
 
+	disable_irq(i2c->irq);
 #if 0
 	lt->hpd_gpio = devm_gpiod_get(dev, "hpd", GPIOD_IN);
 	if (IS_ERR(lt->hpd_gpio)) {
@@ -1103,6 +1261,8 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 	lt->bridge.funcs = &lt8912_bridge_funcs;
 	lt->bridge.of_node = dev->of_node;
 	drm_bridge_add(&lt->bridge);
+
+	lt8912_audio_init(dev, lt);
 
 	return 0;
 }

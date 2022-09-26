@@ -47,6 +47,13 @@
 			compatible = "renesas,vspm_if";
 	};
 
+	sound_card {
+			compatible = "audio-graph-card";
+			//compatible = "simple-audio-card";
+			dais = <&i2s2_port0>;
+	};
+
+
     hdmi-out {
             compatible = "hdmi-connector";
             type = "d";
@@ -60,6 +67,13 @@
 };
 
 &pinctrl {
+
+        ssi1_pins: ssi1 {
+                pinmux = <RZG2L_PORT_PINMUX(46, 0, 1)>, /* BCK */
+                         <RZG2L_PORT_PINMUX(46, 1, 1)>, /* RCK */
+                         <RZG2L_PORT_PINMUX(46, 2, 1)>, /* TXD */
+                         <RZG2L_PORT_PINMUX(46, 3, 1)>; /* RXD */
+        };
 
 };
 
@@ -96,6 +110,23 @@
 	};
 };
 
+
+&ssi1 {
+        pinctrl-0 = <&ssi1_pins>;
+        pinctrl-names = "default";
+
+        status = "okay";
+
+        ports {
+                i2s2_port0: port@0 {
+                        i2s2_cpu_endpoint: endpoint {
+                                remote-endpoint = <&codec_endpoint>;
+                                dai-format = "i2s";
+                        };
+                };
+        };
+};
+
 &i2c0 {
     clock-frequency = <400000>;
     pinctrl-names = "default";
@@ -120,7 +151,8 @@
 		lvds_mode = <1>;
 		bit_color = <0> ;    // 0:24bit   1:18bit
 		hdmi_mode = <0>;     // 0: 1080P  1:720P
-
+		audio_mode = <2>;     // 0:NONE   1: SPDIF 2: I2S
+	
 		display-timings {
 			native-mode = <&timing0>;
 			/* LVDS atk 10.1*/
@@ -159,6 +191,12 @@
 				};
 			};
 
+			port@2 {
+				reg = <2>;
+				codec_endpoint: endpoint {
+						remote-endpoint = <&i2s2_cpu_endpoint>;
+				};
+             };
 
 		};
 
