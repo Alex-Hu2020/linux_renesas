@@ -27,6 +27,9 @@
 		i2c1 = &i2c1;
 		i2c3 = &i2c3;
 
+		can0 = &canfd;
+		can1 = &canfd;
+
 		mmc0 = &sdhi0;
 		mmc1 = &sdhi1;
 	};
@@ -193,7 +196,7 @@
         };
 
         channel1 {
-                status = "disabled";
+                status = "okay";
         };
 };
 
@@ -291,6 +294,13 @@
 	canfd1_pins: can1 {
 		pinmux = <RZG2L_PORT_PINMUX(44, 0, 3)>, /* TxD */
 					<RZG2L_PORT_PINMUX(44, 1, 3)>; /* RxD */
+	};
+
+	spi0_pins: spi0 {
+			pinmux = <RZG2L_PORT_PINMUX(47, 0, 5)>,
+					 <RZG2L_PORT_PINMUX(47, 1, 5)>,
+					 <RZG2L_PORT_PINMUX(47, 2, 5)>,
+					 <RZG2L_PORT_PINMUX(47, 3, 5)>;
 	};
 
 	eth0_pins: eth0 {
@@ -753,4 +763,19 @@
 
 &cru {
 	status = "okay";
+};
+
+&spi0 {
+        pinctrl-0 = <&spi0_pins>;
+        pinctrl-names = "default";
+        status = "okay";
+
+        spidev@0{
+			#address-cellss=<1>;
+			#size-cells=<1>;
+			//compatible = "spidev","rohm,dh2228fv";
+			compatible = "rohm,dh2228fv","ge,achc";
+			spi-max-frequency = <80000000>;
+			reg = <0>;
+       };
 };
