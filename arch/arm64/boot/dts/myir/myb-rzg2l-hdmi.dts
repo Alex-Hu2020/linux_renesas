@@ -148,28 +148,29 @@
 		1: hdmi
 		2: hdmi and lvds
     */
-		lvds_mode = <1>;
+		lvds_mode = <2>;
 		bit_color = <0> ;    // 0:24bit   1:18bit
 		hdmi_mode = <0>;     // 0: 1080P  1:720P
 		audio_mode = <2>;     // 0:NONE   1: SPDIF 2: I2S
-	
+
 		display-timings {
 			native-mode = <&timing0>;
-			/* LVDS atk 10.1*/
 			timing0:timing0{
-				clock-frequency = <71000000>;
-				hactive = <1280>;
-				hsync-len = <32>;
-				hback-porch = <80>;
-				hfront-porch = <48>;
-				vactive = <800>;
-				vsync-len = <6>;
-				vback-porch = <14>;
-				vfront-porch = <3>;
-				vsync-active = <0>;
-				hsync-active =<0>;
-				de-active =<0>;
-				pixelclk-active =<0>;
+					clock-frequency = <51200000>;
+
+					hactive = <1024>;
+					hsync-len = <20>;
+					hback-porch = <162>;
+					hfront-porch = <140>;
+					vactive = <600>;
+					vsync-len = <3>;
+					vback-porch = <20>;
+					vfront-porch = <12>;
+
+					vsync-active = <0>;
+					hsync-active =<0>;
+					de-active =<0>;
+					pixelclk-active =<0>;
 			};
 
 		};
@@ -202,4 +203,15 @@
 
 	};
 
+
+    ft5x06: ft5x06@38 {
+        compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+            reg = <0x38>;
+            interrupt-parent = <&pinctrl>;
+            interrupts = <RZG2L_GPIO(48, 2) IRQ_TYPE_EDGE_FALLING>;
+            reset-gpios = <&pinctrl RZG2L_GPIO(41, 1) GPIO_ACTIVE_LOW>;
+            touchscreen-size-x=<800>;
+            touchscreen-size-y=<480>;
+    };
 };
+
