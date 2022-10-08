@@ -126,7 +126,7 @@
 	clk_ext_camera: clk_ext_camera {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
-		clock-frequency = <12000000>;
+		clock-frequency = <24000000>;
 	};
 
 	leds {
@@ -633,7 +633,7 @@
 
 		clocks = <&clk_ext_camera>;
 		clock-names = "xclk";
-		clock-frequency = <12000000>;
+		clock-frequency = <24000000>;
 		virtual-channel = /bits/ 8 <0>;
 
 		gate-gpios =  <&pinctrl RZG2L_GPIO(39, 0) GPIO_ACTIVE_HIGH>;  // power
