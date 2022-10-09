@@ -788,32 +788,32 @@ lt8912_connector_detect(struct drm_connector *connector, bool force)
 			timeout += 20;
 		}while((hpd_last != hpd) && (timeout < 500));
 		
-//		do {
-//			hpd_last = hpd;
-//			hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
-//				connector_status_connected : connector_status_disconnected;
-//			msleep(20);
-//			timeout += 20;
-//		} while((hpd_last != hpd) && (timeout < 500));
+		do {
+			hpd_last = hpd;
+			hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
+				connector_status_connected : connector_status_disconnected;
+			msleep(20);
+			timeout += 20;
+		} while((hpd_last != hpd) && (timeout < 500));
 
 		dev_info(lt->dev, "lt8912_connector_detect(): %u\n", hpd);
 	}
 	return hpd;
-
-	// struct lt8912 *lt = connector_to_lt8912(connector);
-	// enum drm_connector_status hpd, hpd_last;
-	// int timeout = 0;
-
-	// hpd = connector_status_unknown;
-	// do {
-	// 	hpd_last = hpd;
-	// 	hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
-	// 		connector_status_connected : connector_status_disconnected;
-	// 	msleep(20);
-	// 	timeout += 20;
-	// } while((hpd_last != hpd) && (timeout < 500));
-
-	// return hpd;
+//
+//	 struct lt8912 *lt = connector_to_lt8912(connector);
+//	 enum drm_connector_status hpd, hpd_last;
+//	 int timeout = 0;
+//
+//	 hpd = connector_status_unknown;
+//	 do {
+//	 	hpd_last = hpd;
+//	 	hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
+//	 		connector_status_connected : connector_status_disconnected;
+//	 	msleep(20);
+//	 	timeout += 20;
+//	 } while((hpd_last != hpd) && (timeout < 500));
+//
+//	 return hpd;
 }
 
 static const struct drm_connector_funcs lt8912_connector_funcs = {
@@ -830,13 +830,10 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 	struct lt8912 *lt = arg;
 	struct drm_connector *connector = &lt->connector;
 //	enum drm_connector_status hpd, hpd_last;
-
-	lt->hpd_status = connector_status_connected;
-	printk("alex hdmi iqr\n");
-	//drm_helper_hpd_irq_event(connector->dev);
-
-	//lt8912_init(lt);
-	
+//	lt->hpd_status = connector_status_connected;
+	printk("alex hdmi irq\n");
+	drm_helper_hpd_irq_event(connector->dev);
+	lt8912_init(lt);
 	return IRQ_HANDLED;
 }
 
@@ -1182,21 +1179,21 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 		}
 	}
 
-	if (i2c->irq) {
-		//init_waitqueue_head(&lt8912->wq);
-
-		ret = devm_request_threaded_irq(dev, i2c->irq, NULL,
-						lt8912_hpd_irq_thread,
-						IRQF_ONESHOT, dev_name(dev),
-						lt);
-		if (ret) {
-			dev_err(dev, "failed to request irq\n");
-			return -ENODEV;
-		}
-	}
-
-	disable_irq(i2c->irq);
-#if 0
+//	if (i2c->irq) {
+//		//init_waitqueue_head(&lt8912->wq);
+//
+//		ret = devm_request_threaded_irq(dev, i2c->irq, NULL,
+//						lt8912_hpd_irq_thread,
+//						IRQF_ONESHOT, dev_name(dev),
+//						lt);
+//		if (ret) {
+//			dev_err(dev, "failed to request irq\n");
+//			return -ENODEV;
+//		}
+//	}
+//
+//	disable_irq(i2c->irq);
+#if 1
 	lt->hpd_gpio = devm_gpiod_get(dev, "hpd", GPIOD_IN);
 	if (IS_ERR(lt->hpd_gpio)) {
 		dev_err(dev, "failed to get hpd gpio\n");
