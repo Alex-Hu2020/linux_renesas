@@ -832,7 +832,7 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 //	enum drm_connector_status hpd, hpd_last;
 //	lt->hpd_status = connector_status_connected;
 	printk("alex hdmi irq\n");
-	drm_helper_hpd_irq_event(connector->dev);
+//	drm_helper_hpd_irq_event(connector->dev);
 	lt8912_init(lt);
 	return IRQ_HANDLED;
 }
