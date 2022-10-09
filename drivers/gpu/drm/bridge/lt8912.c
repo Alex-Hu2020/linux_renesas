@@ -775,6 +775,7 @@ lt8912_connector_detect(struct drm_connector *connector, bool force)
 {
 	struct lt8912 *lt = connector_to_lt8912(connector);
 	enum drm_connector_status hpd, hpd_last;
+
 	int timeout = 0;
 
 	if (lt->lvds_mode==0) {
@@ -829,11 +830,8 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 {
 	struct lt8912 *lt = arg;
 	struct drm_connector *connector = &lt->connector;
-//	enum drm_connector_status hpd, hpd_last;
-//	lt->hpd_status = connector_status_connected;
-	printk("alex hdmi irq\n");
-//	drm_helper_hpd_irq_event(connector->dev);
-	lt8912_init(lt);
+
+//	lt8912_init(lt);
 	return IRQ_HANDLED;
 }
 
@@ -967,6 +965,27 @@ static void lt8912_bridge_mode_set(struct drm_bridge *bridge,
 	drm_mode_copy(&lt->mode, adj);
 }
 
+static enum drm_connector_status lt8912_bridge_detect(struct drm_bridge *bridge)
+{
+
+	 struct lt8912 *lt = bridge_to_lt8912(bridge);
+	 enum drm_connector_status hpd, hpd_last;
+	 int timeout = 0;
+
+	 hpd = connector_status_unknown;
+	 do {
+		hpd_last = hpd;
+		hpd = gpiod_get_value_cansleep(lt->hpd_gpio) ?
+			connector_status_connected : connector_status_disconnected;
+		msleep(20);
+		timeout += 20;
+	 } while((hpd_last != hpd) && (timeout < 500));
+
+	 return hpd;
+
+}
+
+
 static int lt8912_bridge_attach(struct drm_bridge *bridge,enum drm_bridge_attach_flags flags)
 {
 	struct lt8912 *lt = bridge_to_lt8912(bridge);
@@ -996,11 +1015,11 @@ static int lt8912_bridge_attach(struct drm_bridge *bridge,enum drm_bridge_attach
 }
 
 static const struct drm_bridge_funcs lt8912_bridge_funcs = {
-	.attach = lt8912_bridge_attach,
-	.mode_set = lt8912_bridge_mode_set,
-//	.pre_enable = lt8912_bridge_pre_enable,
 	.enable = lt8912_bridge_enable,
-	.post_disable = lt8912_bridge_post_disable,
+	.disable = lt8912_bridge_post_disable,
+	.mode_set = lt8912_bridge_mode_set,
+	.attach = lt8912_bridge_attach,
+	.detect = lt8912_bridge_detect,
 };
 
 static const struct regmap_config lt8912_regmap_config = {
@@ -1257,6 +1276,12 @@ static int lt8912_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 
 	lt->bridge.funcs = &lt8912_bridge_funcs;
 	lt->bridge.of_node = dev->of_node;
+
+	lt->bridge.ops = DRM_BRIDGE_OP_DETECT | DRM_BRIDGE_OP_EDID
+			    | DRM_BRIDGE_OP_HPD;
+
+	lt->bridge.type = DRM_MODE_CONNECTOR_HDMIA;
+
 	drm_bridge_add(&lt->bridge);
 
 	lt8912_audio_init(dev, lt);
