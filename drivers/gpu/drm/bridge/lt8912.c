@@ -780,6 +780,7 @@ lt8912_connector_detect(struct drm_connector *connector, bool force)
 	if (lt->lvds_mode==0) {
 		hpd = connector_status_connected;
 	} else {
+		 hpd = connector_status_unknown;
 		do
 		{
 			hpd_last = hpd;
@@ -829,7 +830,7 @@ static irqreturn_t lt8912_hpd_irq_thread(int irq, void *arg)
 {
 	struct lt8912 *lt = arg;
 	struct drm_connector *connector = &lt->connector;
-	//lt8912_init(lt);
+	lt8912_init(lt);
 	return IRQ_HANDLED;
 }
 
