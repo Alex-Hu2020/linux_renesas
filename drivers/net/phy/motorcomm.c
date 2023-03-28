@@ -218,7 +218,7 @@ static int yt8521_led_init(struct phy_device *phydev)
     int val;
 
     val = ytphy_read_ext(phydev, YT8521_EXTREG_LED1);
-    printk("val=%x\n",val);
+    // printk("val=%x\n",val);
     if (val < 0)
         return val;
 
@@ -699,7 +699,7 @@ static int yt8521_config_init(struct phy_device *phydev)
 
 
 		
-	printk (KERN_INFO "yt8521_config_init, 8521 init call out.\n");
+	// printk (KERN_INFO "yt8521_config_init, 8521 init call out.\n");
 	return ret;
 }
 

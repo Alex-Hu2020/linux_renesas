@@ -158,8 +158,8 @@
 		txd1-skew-psec = <0>;
 		txd2-skew-psec = <0>;
 		txd3-skew-psec = <0>;
-		interrupt-parent = <&pinctrl>;
-		interrupts = <RZG2L_GPIO(4, 5) IRQ_TYPE_LEVEL_LOW>;
+		// interrupt-parent = <&pinctrl>;
+		// interrupts = <RZG2L_GPIO(4, 5) IRQ_TYPE_LEVEL_LOW>;
 	};
 };
 
@@ -186,8 +186,8 @@
 		txd1-skew-psec = <0>;
 		txd2-skew-psec = <0>;
 		txd3-skew-psec = <0>;
-		interrupt-parent = <&pinctrl>;
-		interrupts = <RZG2L_GPIO(8, 2) IRQ_TYPE_EDGE_FALLING>;
+		// interrupt-parent = <&pinctrl>;
+		// interrupts = <RZG2L_GPIO(8, 2) IRQ_TYPE_EDGE_FALLING>;
 	};
 };
 
@@ -368,34 +368,6 @@
 			 <RZG2L_PORT_PINMUX(6, 0, 1)>; /* VBUS */
 	};
 
-	spi1_pins: rspi1 {
-		pinmux = <RZG2L_PORT_PINMUX(17, 0, 1)>, /* CK */
-			 <RZG2L_PORT_PINMUX(17, 1, 1)>, /* MOSI */
-			 <RZG2L_PORT_PINMUX(17, 2, 1)>, /* MISO */
-			 <RZG2L_PORT_PINMUX(17, 3, 1)>; /* SSL */
-	};
-
-	spi0_pins: rspi0 {
-		pinmux = <RZG2L_PORT_PINMUX(1, 0, 2)>, /* CK */
-			 <RZG2L_PORT_PINMUX(1, 1, 2)>, /* MOSI */
-			 <RZG2L_PORT_PINMUX(1, 2, 2)>, /* MISO */
-			 <RZG2L_PORT_PINMUX(1, 3, 2)>; /* SSL */
-	};
-
-	spi1_pins: rspi1 {
-		pinmux = <RZG2L_PORT_PINMUX(4, 0, 2)>, /* CK */
-			 <RZG2L_PORT_PINMUX(4, 1, 2)>, /* MOSI */
-			 <RZG2L_PORT_PINMUX(4, 2, 2)>, /* MISO */
-			 <RZG2L_PORT_PINMUX(4, 3, 2)>; /* SSL */
-	};
-
-	spi2_pins: rspi2 {
-		pinmux = <RZG2L_PORT_PINMUX(7, 0, 3)>, /* CK */
-			 <RZG2L_PORT_PINMUX(7, 1, 3)>, /* MOSI */
-			 <RZG2L_PORT_PINMUX(7, 2, 3)>, /* MISO */
-			 <RZG2L_PORT_PINMUX(7, 3, 3)>; /* SSL */
-	};
-
 };
 
 &scif0 {
@@ -471,23 +443,6 @@
 	timeout-sec = <60>;
 };
 
-&spi0 {
-	pinctrl-0 = <&spi0_pins>;
-	pinctrl-names = "default";
-	status = "okay";
-};
-
-&spi1 {
-	pinctrl-0 = <&spi1_pins>;
-	pinctrl-names = "default";
-	status = "disabled";
-};
-
-&spi2 {
-	pinctrl-0 = <&spi2_pins>;
-	pinctrl-names = "default";
-	status = "disabled";
-};
 
 &sbc {
 	status = "disabled";
