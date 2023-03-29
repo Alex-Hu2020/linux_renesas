@@ -18,6 +18,10 @@
 #include <linux/extcon-provider.h>
 #include <linux/gpio/consumer.h>
 
+#include <linux/usb/role.h>
+#include <linux/usb/typec.h>
+#include <linux/extcon.h>
+
 /* PTN5150 registers */
 #define PTN5150_REG_DEVICE_ID			0x01
 #define PTN5150_REG_CONTROL			0x02
@@ -52,6 +56,7 @@ struct ptn5150_info {
 	int irq;
 	struct work_struct irq_work;
 	struct mutex mutex;
+	struct usb_role_switch	*role_sw;
 };
 
 /* List of detectable cables */
@@ -85,6 +90,7 @@ static void ptn5150_check_state(struct ptn5150_info *info)
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, false);
 		gpiod_set_value_cansleep(info->vbus_gpiod, 0);
 		extcon_set_state_sync(info->edev, EXTCON_USB, true);
+		usb_role_switch_set_role(info->role_sw, USB_ROLE_DEVICE);
 		break;
 	case PTN5150_UFP_ATTACHED:
 		extcon_set_state_sync(info->edev, EXTCON_USB, false);
@@ -95,6 +101,7 @@ static void ptn5150_check_state(struct ptn5150_info *info)
 			gpiod_set_value_cansleep(info->vbus_gpiod, 1);
 
 		extcon_set_state_sync(info->edev, EXTCON_USB_HOST, true);
+		usb_role_switch_set_role(info->role_sw, USB_ROLE_HOST);
 		break;
 	default:
 		break;
@@ -199,6 +206,7 @@ static int ptn5150_i2c_probe(struct i2c_client *i2c)
 	struct device *dev = &i2c->dev;
 	struct device_node *np = i2c->dev.of_node;
 	struct ptn5150_info *info;
+	struct fwnode_handle *fwnode;
 	int ret;
 
 	if (!np)
@@ -246,6 +254,18 @@ static int ptn5150_i2c_probe(struct i2c_client *i2c)
 			dev_err(dev, "failed to get INTB IRQ\n");
 			return info->irq;
 		}
+	}
+
+	fwnode = device_get_named_child_node(&i2c->dev, "connector");
+	if (!fwnode)
+		return -ENODEV;
+
+	info->role_sw = fwnode_usb_role_switch_get(fwnode);
+	if (IS_ERR(info->role_sw)) {
+		ret = PTR_ERR(info->role_sw);
+		dev_err(info->dev, "failed to allocate register map: %d\n",
+				   ret);
+		return ret;
 	}
 
 	ret = devm_request_threaded_irq(dev, info->irq, NULL,

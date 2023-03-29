@@ -225,6 +225,24 @@
 		pagesize = <64>;
 	};
 
+	ptn5150: ptn5150@3d {
+		compatible = "nxp,ptn5150";
+		reg = <0x3d>;
+		pinctrl-names = "default";
+		int-gpios = <&pinctrl RZG2L_GPIO(0, 3) GPIO_ACTIVE_HIGH>;
+		status = "okay";
+
+		connector {
+				compatible = "usb-c-connector";
+				label = "USB-C";
+				port {
+						con_usbotg_hs_ep: endpoint {
+										remote-endpoint = <&usbotg_hs_ep>;
+						};
+				};
+		};
+	};
+
 };
 
 &i2c1 {
@@ -248,6 +266,12 @@
 &ohci0 {
 	dr_mode = "otg";
 	status = "okay";
+
+	port {
+		usbotg_hs_ep: endpoint {
+				remote-endpoint = <&con_usbotg_hs_ep>;
+		};
+	};
 };
 
 &ohci1 {
@@ -376,17 +400,6 @@
 			 <RZG2L_PORT_PINMUX(17, 3, 2)>; /* RXD */
 	};
 
-	usb0_pins: usb0 {
-		pinmux = <RZG2L_PORT_PINMUX(5, 0, 1)>, /* VBUS */
-			 <RZG2L_PORT_PINMUX(5, 2, 1)>, /* OVC */
-			 <RZG2L_PORT_PINMUX(5, 3, 1)>; /* OTG_ID */
-	};
-
-	usb1_pins: usb1 {
-		pinmux = <RZG2L_PORT_PINMUX(6, 1, 1)>, /* OVC */
-			 <RZG2L_PORT_PINMUX(6, 0, 1)>; /* VBUS */
-	};
-
 };
 
 &scif0 {
@@ -439,17 +452,11 @@
 
 
 &usb2_phy0 {
-	pinctrl-0 = <&usb0_pins>;
-	pinctrl-names = "default";
-
 	vbus-supply = <&vbus0_usb2>;
 	status = "okay";
 };
 
 &usb2_phy1 {
-	pinctrl-0 = <&usb1_pins>;
-	pinctrl-names = "default";
-
 	status = "okay";
 };
 
