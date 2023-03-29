@@ -213,6 +213,12 @@
 	pinctrl-names = "default";
 
 	status = "okay";
+
+    rx8025t: rx8025t@32 {
+               compatible = "epson,rx8025t";
+               reg = <0x32>;
+    };
+
 };
 
 &i2c1 {
