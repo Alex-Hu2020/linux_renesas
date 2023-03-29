@@ -88,19 +88,19 @@
 			linux,default-trigger = "heartbeat";
 		};
 
-		// led1 {
-		// 	gpios = <&NCA9555 15 GPIO_ACTIVE_LOW>;
-		// 	label = "LED1";
-		// 	default-state = "on";
-		// 	linux,default-trigger = "heartbeat";
-		// };
+		led1 {
+			gpios = <&NCA9555 15 GPIO_ACTIVE_LOW>;
+			label = "LED1";
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
 
-		// led2 {
-		// 	gpios = <&NCA9555 14 GPIO_ACTIVE_LOW>;
-		// 	label = "LED2";
-		// 	default-state = "on";
-		// 	linux,default-trigger = "heartbeat";
-		// };
+		led2 {
+			gpios = <&NCA9555 14 GPIO_ACTIVE_LOW>;
+			label = "LED2";
+			default-state = "on";
+			linux,default-trigger = "heartbeat";
+		};
 	};
 
 };
@@ -219,6 +219,13 @@
 	pinctrl-0 = <&i2c1_pins>;
 	pinctrl-names = "default";
 	status = "okay";
+
+	NCA9555: NCA9555@20 {
+			compatible = "analogtek,at9555";
+			reg = <0x20>;
+			#gpio-cells = <2>;
+			gpio_base = <512>;
+	};
 
 };
 
