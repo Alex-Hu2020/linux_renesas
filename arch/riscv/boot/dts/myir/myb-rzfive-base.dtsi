@@ -291,6 +291,13 @@
 			 <RZG2L_PORT_PINMUX(13, 2, 3)>; /* RX */
 	};
 
+    spi2_pins: spi0 {
+		pinmux = <RZG2L_PORT_PINMUX(11, 0, 4)>,
+					<RZG2L_PORT_PINMUX(11, 1, 4)>,
+					<RZG2L_PORT_PINMUX(11, 2, 4)>,
+					<RZG2L_PORT_PINMUX(11, 3, 4)>;
+    };
+
 	ether0_pins: eth0 {
 		pinmux =
 			 <RZG2L_PORT_PINMUX(4, 3, 1)>, /* ET0_MDC */
@@ -480,6 +487,20 @@
 	sd-uhs-sdr50;
 	sd-uhs-sdr104;
 	status = "okay";
+};
+
+&spi2 {
+        pinctrl-0 = <&spi2_pins>;
+        pinctrl-names = "default";
+        status = "okay";
+
+        spidev@0{
+			#address-cellss=<1>;
+			#size-cells=<1>;
+			compatible = "rohm,dh2228fv";
+			spi-max-frequency = <80000000>;
+			reg = <0>;
+       };
 };
 
 &mtu3 {
