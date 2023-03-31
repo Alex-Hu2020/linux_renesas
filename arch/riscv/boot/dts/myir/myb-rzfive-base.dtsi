@@ -357,7 +357,7 @@
 			 <RZG2L_PORT_PINMUX(12, 1, 5)>; /* RxD */
 	};
 
-	scif4_pins: scif4 {
+	sci0_pins: sci0 {
 		pinmux = <RZG2L_PORT_PINMUX(0, 0, 5)>, /* TxD */
 			 <RZG2L_PORT_PINMUX(0, 1, 5)>; /* RxD */
 	};
@@ -417,6 +417,7 @@
 
 };
 
+/* console */
 &scif0 {
 	pinctrl-0 = <&scif0_pins>;
 	pinctrl-names = "default";
@@ -444,6 +445,11 @@
 	status = "okay";
 };
 
+&sci0 {
+	pinctrl-0 = <&sci0_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
 
 /* eMMC */
 &sdhi0 {
