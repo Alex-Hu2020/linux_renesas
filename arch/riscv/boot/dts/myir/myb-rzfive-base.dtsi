@@ -114,14 +114,14 @@
 };
 
 &canfd {
-	pinctrl-0 = <&canfd0_pins>;
+	pinctrl-0 = <&canfd0_pins &canfd1_pins>;
 	pinctrl-names = "default";
 	status = "okay";
 	channel0 {
 		status = "okay";
 	};
 	channel1 {
-		status = "disabled";
+		status = "okay";
 	};
 };
 
@@ -287,8 +287,13 @@
 	};
 
 	canfd0_pins: canfd0 {
-		pinmux = <RZG2L_PORT_PINMUX(13, 1, 3)>, /* TX */
-			 <RZG2L_PORT_PINMUX(13, 2, 3)>; /* RX */
+		pinmux = <RZG2L_PORT_PINMUX(6, 1, 3)>, /* TX */
+			 <RZG2L_PORT_PINMUX(6, 2, 3)>; /* RX */
+	};
+
+	canfd1_pins: canfd1 {
+		pinmux = <RZG2L_PORT_PINMUX(17, 0, 3)>, /* TX */
+			 <RZG2L_PORT_PINMUX(17, 1, 3)>; /* RX */
 	};
 
     spi2_pins: spi0 {
