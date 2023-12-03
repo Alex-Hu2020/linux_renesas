@@ -11,6 +11,7 @@ obj-$(CONFIG_RTL8723BS)		+= rtl8723bs/
 obj-$(CONFIG_R8712U)		+= rtl8712/
 obj-$(CONFIG_RTL8733BU)		+= rtl8733BU/
 obj-$(CONFIG_R8188EU)		+= rtl8188eu/
+obj-$(CONFIG_RTL8822CS)		+= rtl88x2cs/
 obj-$(CONFIG_RTS5208)		+= rts5208/
 obj-$(CONFIG_NETLOGIC_XLR_NET)	+= netlogic/
 obj-$(CONFIG_OCTEON_ETHERNET)	+= octeon/

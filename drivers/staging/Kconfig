@@ -36,6 +36,8 @@ source "drivers/staging/rtl8192e/Kconfig"
 
 source "drivers/staging/rtl8733BU/Kconfig"
 
+source "drivers/staging/rtl88x2cs/Kconfig"
+
 source "drivers/staging/rtl8723bs/Kconfig"
 
 source "drivers/staging/rtl8712/Kconfig"
@@ -119,5 +121,6 @@ source "drivers/staging/qlge/Kconfig"
 source "drivers/staging/wfx/Kconfig"
 
 source "drivers/staging/hikey9xx/Kconfig"
+
 
 endif # STAGING
