@@ -110,6 +110,13 @@
 			regulator-max-microvolt = <5000000>;
 	};
 
+	reg_5p0v: regulator-reg_5p0v {
+			compatible = "regulator-fixed";
+			regulator-name = "fixed-5.0V";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+	};
+
 	x1_clk: x1-clock {
 			compatible = "fixed-clock";
 			#clock-cells = <0>;
@@ -554,7 +561,14 @@
 &ohci0 {
 	memory-region = <&global_cma>;
 	dr_mode = "otg";
+	// dr_mode = "device";
+	 // otg / host / peripheral  device
 	status = "okay";
+	port {
+		usbotg_hs_ep: endpoint {
+				remote-endpoint = <&con_usbotg_hs_ep>;
+		};
+	};
 };
 
 &ehci1 {
@@ -612,6 +626,29 @@
 
 	};
 
+	stusb1600@28 {
+		compatible = "st,stusb1600";
+		reg = <0x28>;
+
+		interrupt-parent = <&pinctrl>;
+		interrupts = <RZG2L_GPIO(1, 1) IRQ_TYPE_EDGE_FALLING>;
+		vdd-supply = <&reg_5p0v>;
+
+		status = "okay";
+
+		connector {
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			power-role = "dual";
+			power-opmode = "default";
+
+			port {
+				con_usbotg_hs_ep: endpoint {
+					remote-endpoint = <&usbotg_hs_ep>;
+				};
+			};
+		};
+	};
 };
 
 &i2c1 {
