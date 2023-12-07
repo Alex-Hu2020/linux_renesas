@@ -417,7 +417,9 @@
 	};
 
 	scif1_pins: scif1 {
-			pinmux = <RZG2L_PORT_PINMUX(40, 0, 1)>, /* TxD */
+			pinmux = <RZG2L_PORT_PINMUX(41, 0, 1)>,
+				 <RZG2L_PORT_PINMUX(41, 1, 1)>,
+				 <RZG2L_PORT_PINMUX(40, 0, 1)>, /* TxD */
 						<RZG2L_PORT_PINMUX(40, 1, 1)>; /* RxD */
 	};
 
@@ -718,10 +720,10 @@
 	status = "okay";
 };
 
-/* RS485 */
 &scif1 {
 	pinctrl-0 = <&scif1_pins>;
 	pinctrl-names = "default";
+	uart-has-rtscts;
 	status = "okay";
 };
 
