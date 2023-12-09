@@ -164,6 +164,41 @@
 		};
 	};
 
+	sound_rzg2l: sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&cpu_dai>;
+		simple-audio-card,frame-master = <&cpu_dai>;
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+				"Headphone", "LOUT1",
+				"Headphone", "ROUT1",
+				"Speaker", "LOUT2",
+				"Speaker", "ROUT2",
+				"Microphone", "Microphone Jack",
+				"Headphone", "Headphone Jack",
+				"Speaker", "Speaker Ext",
+				"Line", "Line In Jack";
+		simple-audio-card,routing =
+				"Headphone", "LOUT1",
+				"Headphone", "ROUT1",
+				"Speaker", "LOUT2",
+				"Speaker", "ROUT2",
+				"MIC_IN", "Microphone Jack",
+				"Microphone Jack", "Mic Bias",
+				"LINE_IN", "Line In Jack",
+				"Headphone Jack", "HP_OUT",
+				"Speaker Ext", "LINE_OUT";
+
+		cpu_dai: simple-audio-card,cpu {
+				sound-dai = <&ssi0>;
+		};
+		codec_dai: simple-audio-card,codec {
+				sound-dai = <&es8388>;
+				clocks = <&versa3 3>;
+		};
+    };
+
 };
 
 &adc {
@@ -664,6 +699,19 @@
 		reg = <0x32>;
 	};
 
+	es8388: es8388@11 {
+        #sound-dai-cells = <0>;
+        compatible = "everest,es8388", "everest,es8323";
+        reg = <0x11>;
+        // clocks = <&cru I2S0_8CH_MCLKOUT>;
+        // clock-names = "mclk";
+        // assigned-clocks = <&cru I2S0_8CH_MCLKOUT>;
+        // assigned-clock-rates = <12288000>;
+        // pinctrl-names = "default";
+        // pinctrl-0 = <&i2s0_mclk>;
+		clocks = <&clk_ext_audio>;
+		status = "okay";
+    };
 };
 
 &i2c3 {
