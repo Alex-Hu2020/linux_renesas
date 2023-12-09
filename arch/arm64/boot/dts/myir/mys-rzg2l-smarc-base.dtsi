@@ -165,6 +165,32 @@
 		};
 	};
 
+	sound_rzg2l: sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,name = "G2LX_SOUND";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&cpu_dai>;
+		simple-audio-card,frame-master = <&cpu_dai>;
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+			"Headphone", "Headphone Jack",
+			"Microphone", "Mic Jack";
+		simple-audio-card,routing =
+			"Headphone Jack",	"LOUT1",
+			"Headphone Jack",	"ROUT1",
+			"LINPUT1", "Mic Jack",
+			"RINPUT1", "Mic Jack";
+
+		cpu_dai: simple-audio-card,cpu {
+				system-clock-frequency = <11289600>;
+				sound-dai = <&ssi0>;
+		};
+		codec_dai: simple-audio-card,codec {
+				sound-dai = <&es8388>;
+				clocks = <&versa3 3>;
+		};
+    };
+
 };
 
 &adc {
@@ -670,6 +696,14 @@
 		reg = <0x32>;
 	};
 
+	es8388: es8388@10 {
+        compatible = "everest,es8388";
+        reg = <0x10>;
+		#sound-dai-cells = <0>;
+        clock-names = "mclk";
+		clocks = <&clk_ext_audio>;
+		status = "okay";
+    };
 };
 
 &i2c3 {
