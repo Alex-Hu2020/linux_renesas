@@ -71,8 +71,7 @@
         ssi1_pins: ssi1 {
                 pinmux = <RZG2L_PORT_PINMUX(46, 0, 1)>, /* BCK */
                          <RZG2L_PORT_PINMUX(46, 1, 1)>, /* RCK */
-                         <RZG2L_PORT_PINMUX(46, 2, 1)>, /* TXD */
-                         <RZG2L_PORT_PINMUX(46, 3, 1)>; /* RXD */
+                         <RZG2L_PORT_PINMUX(46, 2, 1)>; /* TXD */
         };
 
 };

@@ -21,6 +21,7 @@
 		serial1 = &scif1;
 		serial2 = &scif2;
 		serial3 = &scif3;
+		serial4 = &scif4;
 
 		i2c0 = &i2c0;
 		i2c1 = &i2c1;
@@ -433,6 +434,11 @@
 						<RZG2L_PORT_PINMUX(0, 1, 5)>;/* RxD */
 	};
 
+	scif4_pins: scif4 {
+			pinmux = <RZG2L_PORT_PINMUX(2, 0, 5)>, /* TxD */
+						<RZG2L_PORT_PINMUX(2, 1, 5)>;/* RxD */
+	};
+
         gpt4_pins: gpt4 {
                 pinmux = <RZG2L_PORT_PINMUX(43, 0, 2)>; /* Channel A */
         };
@@ -720,6 +726,7 @@
 	status = "okay";
 };
 
+/*BT*/
 &scif1 {
 	pinctrl-0 = <&scif1_pins>;
 	pinctrl-names = "default";
@@ -727,15 +734,22 @@
 	status = "okay";
 };
 
+/*Raspberry Pi RS232*/
 &scif2 {
         pinctrl-0 = <&scif2_pins>;
         pinctrl-names = "default";
         status = "okay";
 };
 
-/* RS232 */
 &scif3 {
         pinctrl-0 = <&scif3_pins>;
+        pinctrl-names = "default";
+        status = "disabled";
+};
+
+/*Raspberry Pi RS485*/
+&scif4 {
+        pinctrl-0 = <&scif4_pins>;
         pinctrl-names = "default";
         status = "okay";
 };
