@@ -1,0 +1,260 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Device Tree Source for the RZG2L Dual A55 Evaluation board
+ *
+ * Copyright (C) 2022 MYiR Electronics Corp.
+ */
+
+/dts-v1/;
+#include "mys-rzg2l-smarc-base.dtsi"
+
+/ {
+
+	memory@48000000 {
+		device_type = "memory";
+		/* first 128MB is reserved for secure area. */
+		reg = <0x0 0x48000000 0x0 0x78000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		global_cma: linux,cma@58000000 {
+			compatible = "shared-dma-pool";
+			linux,cma-default;
+			reusable;
+			reg = <0x0 0x58000000 0x0 0x10000000>;
+		};
+		mmp_reserved: linux,multimedia {
+			compatible = "shared-dma-pool";
+			reusable;
+			reg = <0x00000000 0x68000000 0x0 0x8000000>;
+		};
+	};
+
+	mmngr {
+		compatible = "renesas,mmngr";
+		memory-region = <&mmp_reserved>;
+	};
+
+	mmngrbuf {
+		compatible = "renesas,mmngrbuf";
+	};
+
+	vspm_if {
+			compatible = "renesas,vspm_if";
+	};
+
+	sound_card {
+			compatible = "audio-graph-card";
+			//compatible = "simple-audio-card";
+			dais = <&i2s2_port0>;
+	};
+
+
+    hdmi-out {
+            compatible = "hdmi-connector";
+            type = "d";
+
+            port {
+                    hdmi_con_out: endpoint {
+                            remote-endpoint = <&lt8912_out>;
+                    };
+            };
+    };
+};
+
+&pinctrl {
+	sdhi1_pins: sd1 {
+		sd1_data {
+			pins = "SD1_DATA0", "SD1_DATA1", "SD1_DATA2", "SD1_DATA3";
+			power-source  = <3300>;
+		};
+
+		sd1_ctrl {
+			pins = "SD1_CLK", "SD1_CMD";
+			power-source  = <3300>;
+		};
+
+		sd1_mux {
+			groups = "sdhi1_cd_b";
+			function = "sdhi1";
+		};
+	};
+
+	sdhi1_pins_uhs: sd1_uhs {
+		sd1_data_uhs {
+			pins = "SD1_DATA0", "SD1_DATA1", "SD1_DATA2", "SD1_DATA3";
+			power-source  = <1800>;
+		};
+
+		sd1_ctrl_uhs {
+			pins = "SD1_CLK", "SD1_CMD";
+			power-source  = <1800>;
+		};
+
+		sd1_mux_uhs {
+			groups = "sdhi1_cd_b";
+			function = "sdhi1";
+		};
+	};
+
+        ssi1_pins: ssi1 {
+                pinmux = <RZG2L_PORT_PINMUX(46, 0, 1)>, /* BCK */
+                         <RZG2L_PORT_PINMUX(46, 1, 1)>, /* RCK */
+                         <RZG2L_PORT_PINMUX(46, 2, 1)>; /* TXD */
+        };
+
+};
+
+&ehci0 {
+	memory-region = <&global_cma>;
+};
+
+&ohci0 {
+	memory-region = <&global_cma>;
+};
+
+&ehci1 {
+	memory-region = <&global_cma>;
+};
+
+&ohci1 {
+	memory-region = <&global_cma>;
+};
+
+&du {
+    status = "okay";
+};
+
+/* MIPI DSI */
+&dsi0 {
+	status = "okay";
+	ports {
+		port@1 {
+			dsi0_out: endpoint {
+				remote-endpoint = <&lt8912_in>;
+				data-lanes = <1 2 3 4>;
+			};
+		};
+	};
+};
+
+&ssi1 {
+        pinctrl-0 = <&ssi1_pins>;
+        pinctrl-names = "default";
+
+        status = "okay";
+
+        ports {
+                i2s2_port0: port@0 {
+                        i2s2_cpu_endpoint: endpoint {
+                                remote-endpoint = <&codec_endpoint>;
+                                dai-format = "i2s";
+                        };
+                };
+        };
+};
+
+&i2c0 {
+    clock-frequency = <400000>;
+    pinctrl-names = "default";
+    status = "okay";
+
+	/* MIPI-DSI to HDMI and LVDS adapter */
+	hdmi@48 {
+		compatible = "lontium,lt8912";
+		ddc-i2c-bus = <&i2c0>;
+		dsi-lanes = <4>;
+		reg = <0x48>;
+		reset-gpios = <&pinctrl RZG2L_GPIO(42, 2) GPIO_ACTIVE_HIGH>;
+		hpd-gpios = <&pinctrl RZG2L_GPIO(16, 1) GPIO_ACTIVE_HIGH>;
+	//	interrupt-parent = <&pinctrl>;
+	//	interrupts = <RZG2L_GPIO(16, 1) IRQ_TYPE_EDGE_RISING>;
+
+	/*  LVDS output or HDMI output
+		0: lvds
+		1: hdmi
+		2: hdmi and lvds
+    */
+		lvds_mode = <2>;
+		bit_color = <0> ;    // 0:24bit   1:18bit
+		hdmi_mode = <0>;     // 0: 1080P  1:720P
+		audio_mode = <2>;     // 0:NONE   1: SPDIF 2: I2S
+
+		display-timings {
+			native-mode = <&timing0>;
+			timing0:timing0{
+					clock-frequency = <51200000>;
+
+					hactive = <1024>;
+					hsync-len = <20>;
+					hback-porch = <162>;
+					hfront-porch = <140>;
+					vactive = <600>;
+					vsync-len = <3>;
+					vback-porch = <20>;
+					vfront-porch = <12>;
+
+					vsync-active = <0>;
+					hsync-active =<0>;
+					de-active =<0>;
+					pixelclk-active =<0>;
+			};
+
+		};
+
+		ports{
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				lt8912_in: endpoint@0 {
+					remote-endpoint = <&dsi0_out>;
+				};
+			};
+
+			port@1 {
+				reg = <1>;
+				lt8912_out: endpoint@1 {
+					remote-endpoint = <&hdmi_con_out>;
+				};
+			};
+
+			port@2 {
+				reg = <2>;
+				codec_endpoint: endpoint {
+						remote-endpoint = <&i2s2_cpu_endpoint>;
+				};
+             };
+
+		};
+
+	};
+
+
+    ft5x06: ft5x06@38 {
+        compatible = "edt,edt-ft5406", "edt,edt-ft5x06";
+            reg = <0x38>;
+            interrupt-parent = <&pinctrl>;
+            interrupts = <RZG2L_GPIO(48, 2) IRQ_TYPE_EDGE_FALLING>;
+            reset-gpios = <&pinctrl RZG2L_GPIO(42, 3) GPIO_ACTIVE_LOW>;
+            touchscreen-size-x=<1024>;
+            touchscreen-size-y=<600>;
+    };
+};
+
+/*sdcard*/
+&sdhi1 {
+	pinctrl-0 = <&sdhi1_pins>;
+	pinctrl-1 = <&sdhi1_pins_uhs>;
+	pinctrl-names = "default", "state_uhs";
+	vmmc-supply = <&reg_3p3v>;
+	vqmmc-supply = <&reg_3p3v>;
+	cd-gpios = <&pinctrl RZG2L_GPIO(19, 0) GPIO_ACTIVE_LOW>;
+	bus-width = <4>;
+	disable-wp;
+	status = "okay";
+};

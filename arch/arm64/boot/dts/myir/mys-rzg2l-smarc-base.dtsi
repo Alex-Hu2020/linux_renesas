@@ -380,40 +380,6 @@
 		};
 	};
 
-	sdhi1_pins: sd1 {
-		sd1_data {
-			pins = "SD1_DATA0", "SD1_DATA1", "SD1_DATA2", "SD1_DATA3";
-			power-source  = <3300>;
-		};
-
-		sd1_ctrl {
-			pins = "SD1_CLK", "SD1_CMD";
-			power-source  = <3300>;
-		};
-
-		sd1_mux {
-			groups = "sdhi1_cd_b";
-			function = "sdhi1";
-		};
-	};
-
-	sdhi1_pins_uhs: sd1_uhs {
-		sd1_data_uhs {
-			pins = "SD1_DATA0", "SD1_DATA1", "SD1_DATA2", "SD1_DATA3";
-			power-source  = <1800>;
-		};
-
-		sd1_ctrl_uhs {
-			pins = "SD1_CLK", "SD1_CMD";
-			power-source  = <1800>;
-		};
-
-		sd1_mux_uhs {
-			groups = "sdhi1_cd_b";
-			function = "sdhi1";
-		};
-	};
-
 	sound_clk_pins: sound_clk {
 			pins = "AUDIO_CLK1", "AUDIO_CLK2";
 			input-enable;
@@ -528,22 +494,6 @@
 	mmc-hs200-1_8v;
 	non-removable;
 	fixed-emmc-driver-type = <1>;
-	status = "okay";
-};
-
-/*sdcard*/
-&sdhi1 {
-	pinctrl-0 = <&sdhi1_pins>;
-	pinctrl-1 = <&sdhi1_pins_uhs>;
-	pinctrl-names = "default", "state_uhs";
-	vmmc-supply = <&reg_3p3v>;
-        vqmmc-supply = <&reg_3p3v>;
-	cd-gpios = <&pinctrl RZG2L_GPIO(19, 0) GPIO_ACTIVE_LOW>;
-	bus-width = <4>;
-//	sd-uhs-sdr50;
-//	sd-uhs-sdr104;
-//	sd-uhs-ddr50;
-	disable-wp;
 	status = "okay";
 };
 
