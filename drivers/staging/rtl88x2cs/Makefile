@@ -20,7 +20,18 @@ ifeq ($(GCC_VER_49),1)
 EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and later
 endif
 
+PWD := $(shell pwd)
+DIR_SOURCE=source
+TMP=/drivers/staging/rtl88x2cs/
+test = $(shell if [ -d $(PWD)/$(DIR_SOURCE) ]; then echo "exist"; else echo "noexist"; fi)
+ifeq ("$(test)", "exist")
+	src=$(PWD)/$(DIR_SOURCE)$(TMP)
+else
+	src=$(PWD)$(TMP)
+endif
+
 EXTRA_CFLAGS += -I$(src)/include
+ccflags-y := -I $(srctree)/$(src)/include
 
 EXTRA_LDFLAGS += --strip-debug
 
@@ -104,7 +115,7 @@ EXTRA_CFLAGS += -DCONFIG_RTW_ANDROID=$(CONFIG_RTW_ANDROID)
 endif
 
 ########################## Debug ###########################
-CONFIG_RTW_DEBUG = y
+CONFIG_RTW_DEBUG = n
 # default log level is _DRV_INFO_ = 4,
 # please refer to "How_to_set_driver_debug_log_level.doc" to set the available level.
 CONFIG_RTW_LOG_LEVEL = 4
