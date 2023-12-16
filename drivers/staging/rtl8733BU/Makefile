@@ -20,7 +20,18 @@ ifeq ($(GCC_VER_49),1)
 EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and later
 endif
 
+PWD := $(shell pwd)
+DIR_SOURCE=source
+TMP=/drivers/staging/rtl8733BU/
+test = $(shell if [ -d $(PWD)/$(DIR_SOURCE) ]; then echo "exist"; else echo "noexist"; fi)
+ifeq ("$(test)", "exist")
+       src=$(PWD)/$(DIR_SOURCE)$(TMP)
+else
+       src=$(PWD)$(TMP)
+endif
+
 EXTRA_CFLAGS += -I$(src)/include
+ccflags-y := -I $(srctree)/$(src)/include
 
 EXTRA_LDFLAGS += --strip-debug
 
